@@ -1,0 +1,13 @@
+com.devsouzx.adotapet
+com.devsouzx.adotapet.dao
+com.devsouzx.adotapet.exception
+com.devsouzx.adotapet.model
+com.devsouzx.adotapet.model.enums
+com.devsouzx.adotapet.test
+com.devsouzx.adotapet.test.aprovacao
+com.devsouzx.adotapet.test.avaliacao
+com.devsouzx.adotapet.test.cadastro
+com.devsouzx.adotapet.test.consulta
+com.devsouzx.adotapet.test.exclusao
+com.devsouzx.adotapet.test.solicitacao
+com.devsouzx.adotapet.util

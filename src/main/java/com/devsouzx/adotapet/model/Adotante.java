@@ -9,6 +9,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe que representa um adotante no sistema de adoção de pets.
+ * Herda de {@link Usuario} e contém informações específicas do adotante
+ * como CPF, data de nascimento e endereço.
+ *
+ * @author Equipe Adoção de Pets
+ * @version 1.0
+ * @since 2026
+ */
 public class Adotante extends Usuario {
     private String cpf;
     private LocalDate dataNascimento;
