@@ -1,4 +1,4 @@
-package util;
+package com.devsouzx.adotapet.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,25 +8,30 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ConexaoBD {
-    private static final String URL = "jdbc:mysql://localhost:3306/adotapet";
+
+    private static final String URL = "jdbc:mysql://localhost:3306/adotapet?useSSL=false&allowPublicKeyRetrieval=true";
     private static final String USUARIO = "root";
     private static final String SENHA = "";
 
     private static Connection conexao = null;
 
+    static {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            System.out.println("Driver MySQL carregado!");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Driver MySQL não encontrado!");
+        }
+    }
+
     public static Connection getConexao() {
-        if (conexao == null) {
-            try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
+        try {
+            if (conexao == null || conexao.isClosed()) {
                 conexao = DriverManager.getConnection(URL, USUARIO, SENHA);
-                System.out.println("Conectado ao banco de dados!");
-            } catch (ClassNotFoundException e) {
-                System.out.println("Driver MySQL não encontrado!");
-                e.printStackTrace();
-            } catch (SQLException e) {
-                System.out.println("Erro ao conectar ao banco: " + e.getMessage());
-                e.printStackTrace();
+                System.out.println("✅ Conectado ao banco de dados!");
             }
+        } catch (SQLException e) {
+            System.out.println("❌ Erro ao conectar: " + e.getMessage());
         }
         return conexao;
     }
@@ -36,7 +41,7 @@ public class ConexaoBD {
             try {
                 conexao.close();
                 conexao = null;
-                System.out.println("Conexão fechada.");
+                System.out.println("✅ Conexão fechada.");
             } catch (SQLException e) {
                 e.printStackTrace();
             }

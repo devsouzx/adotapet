@@ -2,6 +2,7 @@ package com.devsouzx.adotapet.dao;
 
 import com.devsouzx.adotapet.model.Abrigo;
 import com.devsouzx.adotapet.model.Endereco;
+import com.devsouzx.adotapet.util.ConexaoBD;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -9,10 +10,10 @@ import java.util.List;
 
 public class AbrigoDAO {
 
-    public void inserir(Abrigo abrigo) {
+    public void inserir(Abrigo abrigo) throws SQLException {
         String sql = "INSERT INTO abrigo (nome, email, senha, telefone, cnpj, nome_responsavel, horario_funcionamento, endereco_id, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = util.ConexaoBD.getConexao();
+        try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, abrigo.getNome());
@@ -27,78 +28,112 @@ public class AbrigoDAO {
 
             pstmt.executeUpdate();
 
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                abrigo.setId(rs.getInt(1));
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    abrigo.setId(rs.getInt(1));
+                }
             }
-
-            System.out.println("Abrigo inserido com sucesso! ID: " + abrigo.getId());
-
-        } catch (SQLException e) {
-            System.out.println("Erro ao inserir abrigo: " + e.getMessage());
         }
     }
 
     public Abrigo buscarPorId(int id) {
         String sql = "SELECT * FROM abrigo WHERE id = ?";
+        Abrigo abrigo = null;
 
-        try (Connection conn = util.ConexaoBD.getConexao();
+        try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String nome = rs.getString("nome");
+                    String email = rs.getString("email");
+                    String senha = rs.getString("senha");
+                    String telefone = rs.getString("telefone");
+                    String cnpj = rs.getString("cnpj");
+                    String nomeResponsavel = rs.getString("nome_responsavel");
+                    String horarioFuncionamento = rs.getString("horario_funcionamento");
+                    int enderecoId = rs.getInt("endereco_id");
 
-            if (rs.next()) {
-                return extrairAbrigo(rs);
+                    EnderecoDAO enderecoDAO = new EnderecoDAO();
+                    Endereco endereco = enderecoDAO.buscarPorId(enderecoId);
+
+                    abrigo = new Abrigo(id, nome, email, senha, telefone, cnpj, nomeResponsavel, endereco);
+                    abrigo.setHorarioFuncionamento(horarioFuncionamento);
+                }
             }
-
         } catch (SQLException e) {
-            System.out.println("Erro ao buscar abrigo: " + e.getMessage());
+            System.out.println("❌ Erro ao buscar abrigo: " + e.getMessage());
         }
-        return null;
+        return abrigo;
     }
 
     public Abrigo buscarPorEmail(String email) {
         String sql = "SELECT * FROM abrigo WHERE email = ?";
+        Abrigo abrigo = null;
 
-        try (Connection conn = util.ConexaoBD.getConexao();
+        try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    String nome = rs.getString("nome");
+                    String senha = rs.getString("senha");
+                    String telefone = rs.getString("telefone");
+                    String cnpj = rs.getString("cnpj");
+                    String nomeResponsavel = rs.getString("nome_responsavel");
+                    String horarioFuncionamento = rs.getString("horario_funcionamento");
+                    int enderecoId = rs.getInt("endereco_id");
 
-            if (rs.next()) {
-                return extrairAbrigo(rs);
+                    EnderecoDAO enderecoDAO = new EnderecoDAO();
+                    Endereco endereco = enderecoDAO.buscarPorId(enderecoId);
+
+                    abrigo = new Abrigo(id, nome, email, senha, telefone, cnpj, nomeResponsavel, endereco);
+                    abrigo.setHorarioFuncionamento(horarioFuncionamento);
+                }
             }
-
         } catch (SQLException e) {
-            System.out.println("Erro ao buscar abrigo: " + e.getMessage());
+            System.out.println("❌ Erro ao buscar abrigo: " + e.getMessage());
         }
-        return null;
+        return abrigo;
     }
 
     public List<Abrigo> listarTodos() {
         List<Abrigo> lista = new ArrayList<>();
         String sql = "SELECT * FROM abrigo";
 
-        try (Connection conn = util.ConexaoBD.getConexao();
+        try (Connection conn = ConexaoBD.getConexao();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                lista.add(extrairAbrigo(rs));
+                int id = rs.getInt("id");
+                String nome = rs.getString("nome");
+                String email = rs.getString("email");
+                String senha = rs.getString("senha");
+                String telefone = rs.getString("telefone");
+                String cnpj = rs.getString("cnpj");
+                String nomeResponsavel = rs.getString("nome_responsavel");
+                String horarioFuncionamento = rs.getString("horario_funcionamento");
+
+                // Não buscar endereço aqui para evitar múltiplas conexões
+                Abrigo abrigo = new Abrigo(id, nome, email, senha, telefone, cnpj, nomeResponsavel, null);
+                abrigo.setHorarioFuncionamento(horarioFuncionamento);
+                lista.add(abrigo);
             }
 
         } catch (SQLException e) {
-            System.out.println("Erro ao listar abrigos: " + e.getMessage());
+            System.out.println("❌ Erro ao listar abrigos: " + e.getMessage());
         }
         return lista;
     }
 
-    public void atualizar(Abrigo abrigo) {
+    public void atualizar(Abrigo abrigo) throws SQLException {
         String sql = "UPDATE abrigo SET nome = ?, email = ?, senha = ?, telefone = ?, nome_responsavel = ?, horario_funcionamento = ? WHERE id = ?";
 
-        try (Connection conn = util.ConexaoBD.getConexao();
+        try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, abrigo.getNome());
@@ -109,54 +144,18 @@ public class AbrigoDAO {
             pstmt.setString(6, abrigo.getHorarioFuncionamento());
             pstmt.setInt(7, abrigo.getId());
 
-            int rows = pstmt.executeUpdate();
-            if (rows > 0) {
-                System.out.println("Abrigo atualizado com sucesso!");
-            } else {
-                System.out.println("Abrigo não encontrado para atualizar.");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Erro ao atualizar abrigo: " + e.getMessage());
+            pstmt.executeUpdate();
         }
     }
 
-    public void excluir(int id) {
+    public void excluir(int id) throws SQLException {
         String sql = "DELETE FROM abrigo WHERE id = ?";
 
-        try (Connection conn = util.ConexaoBD.getConexao();
+        try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, id);
-            int rows = pstmt.executeUpdate();
-
-            if (rows > 0) {
-                System.out.println("Abrigo excluído com sucesso!");
-            } else {
-                System.out.println("Abrigo não encontrado para excluir.");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Erro ao excluir abrigo: " + e.getMessage());
+            pstmt.executeUpdate();
         }
-    }
-
-    private Abrigo extrairAbrigo(ResultSet rs) throws SQLException {
-        EnderecoDAO enderecoDAO = new EnderecoDAO();
-        Endereco endereco = enderecoDAO.buscarPorId(rs.getInt("endereco_id"));
-
-        Abrigo abrigo = new Abrigo(
-                rs.getInt("id"),
-                rs.getString("nome"),
-                rs.getString("email"),
-                rs.getString("senha"),
-                rs.getString("telefone"),
-                rs.getString("cnpj"),
-                rs.getString("nome_responsavel"),
-                endereco
-        );
-        abrigo.setHorarioFuncionamento(rs.getString("horario_funcionamento"));
-        abrigo.setDataCadastro(rs.getTimestamp("data_cadastro").toLocalDateTime());
-        return abrigo;
     }
 }

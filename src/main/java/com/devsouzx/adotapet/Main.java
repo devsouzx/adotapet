@@ -6,6 +6,7 @@ import com.devsouzx.adotapet.dao.PetDAO;
 import com.devsouzx.adotapet.model.Abrigo;
 import com.devsouzx.adotapet.model.Adotante;
 import com.devsouzx.adotapet.model.Pet;
+import com.devsouzx.adotapet.util.ConexaoBD;
 
 import javax.swing.*;
 import java.util.List;
@@ -14,7 +15,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        util.ConexaoBD.testarConexao();
+        ConexaoBD.testarConexao();
 
         PetDAO petDAO = new PetDAO();
         AbrigoDAO abrigoDAO = new AbrigoDAO();
@@ -24,17 +25,17 @@ public class Main {
 
             String opcao = JOptionPane.showInputDialog(
                     """
-                    ===== ADOTAPET =====
-                    
-                    1 - Listar Pets
-                    2 - Listar Pets Disponíveis
-                    3 - Buscar Pet por ID
-                    4 - Listar Abrigos
-                    5 - Listar Adotantes
-                    0 - Sair
-                    
-                    Escolha uma opção:
-                    """
+                            ===== ADOTAPET =====
+                            
+                            1 - Listar Pets
+                            2 - Listar Pets Disponíveis
+                            3 - Buscar Pet por ID
+                            4 - Listar Abrigos
+                            5 - Listar Adotantes
+                            0 - Sair
+                            
+                            Escolha uma opção:
+                            """
             );
 
             if (opcao == null || opcao.equals("0")) {
@@ -140,6 +141,6 @@ public class Main {
             }
         }
 
-        util.ConexaoBD.fecharConexao();
+        ConexaoBD.fecharConexao();
     }
 }
