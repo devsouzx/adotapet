@@ -1,8 +1,10 @@
 package com.devsouzx.adotapet.model;
 
+import com.devsouzx.adotapet.dao.SolicitacaoDAO;
 import com.devsouzx.adotapet.model.enums.StatusSolicitacao;
 import com.devsouzx.adotapet.exception.AdocaoException;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +36,24 @@ public class Adotante extends Usuario {
         this.avaliacoes = new ArrayList<>();
     }
 
-    public void solicitarAdocao(Pet pet) throws AdocaoException {
+    public void solicitarAdocao(Pet pet) throws AdocaoException, SQLException {
         if (getSolicitacoesPendentes() >= 3) {
-            throw new AdocaoException("Você já possui 3 solicitações pendentes. Aguarde a resposta dos abrigos.");
+            throw new AdocaoException("Você já possui 3 solicitações pendentes.");
         }
         if (!pet.isDisponivel()) {
             throw new AdocaoException("Este pet não está mais disponível para adoção.");
         }
         if (pet.temSolicitacaoPendente()) {
-            throw new AdocaoException("Este pet já foi solicitado por outro adotante e está aguardando análise.");
+            throw new AdocaoException("Este pet já foi solicitado por outro adotante.");
         }
 
         SolicitacaoAdocao solicitacao = new SolicitacaoAdocao(this, pet);
         solicitacoes.add(solicitacao);
         pet.adicionarSolicitacao(solicitacao);
+
+        SolicitacaoDAO solicitacaoDAO = new SolicitacaoDAO();
+        solicitacaoDAO.inserir(solicitacao);
+        System.out.println("   → Solicitação salva no banco com ID: " + solicitacao.getId());
     }
 
     public void cancelarSolicitacao(int idSolicitacao) throws AdocaoException {
