@@ -281,15 +281,31 @@ public class SolicitacaoDAO {
         Connection conn = null;
         PreparedStatement pstmtSolic = null;
         PreparedStatement pstmtPet = null;
+        PreparedStatement pstmtBusca = null;
+        ResultSet rs = null;
 
         try {
             conn = ConexaoBD.getConexao();
             conn.setAutoCommit(false);
 
-            SolicitacaoAdocao solicitacao = buscarPorId(idSolicitacao);
-            if (solicitacao == null || solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
+            String sqlBusca = "SELECT * FROM solicitacao_adocao WHERE id = ?";
+            pstmtBusca = conn.prepareStatement(sqlBusca);
+            pstmtBusca.setInt(1, idSolicitacao);
+            rs = pstmtBusca.executeQuery();
+
+            if (!rs.next()) {
                 return false;
             }
+
+            int petId = rs.getInt("pet_id");
+            String statusAtual = rs.getString("status");
+
+            if (!statusAtual.equals("PENDENTE")) {
+                return false;
+            }
+
+            rs.close();
+            pstmtBusca.close();
 
             String sqlSolic = "UPDATE solicitacao_adocao SET data_resposta = ?, status = ? WHERE id = ?";
             pstmtSolic = conn.prepareStatement(sqlSolic);
@@ -301,19 +317,32 @@ public class SolicitacaoDAO {
             String sqlPet = "UPDATE pet SET status = ? WHERE id = ?";
             pstmtPet = conn.prepareStatement(sqlPet);
             pstmtPet.setString(1, "ADOTADO");
-            pstmtPet.setInt(2, solicitacao.getPet().getId());
+            pstmtPet.setInt(2, petId);
             pstmtPet.executeUpdate();
 
             conn.commit();
             return true;
 
         } catch (SQLException e) {
-            if (conn != null) conn.rollback();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             throw e;
         } finally {
-            if (pstmtSolic != null) pstmtSolic.close();
-            if (pstmtPet != null) pstmtPet.close();
-            if (conn != null) conn.setAutoCommit(true);
+            // Fechar todos os recursos
+            try {
+                if (rs != null) rs.close();
+                if (pstmtBusca != null) pstmtBusca.close();
+                if (pstmtSolic != null) pstmtSolic.close();
+                if (pstmtPet != null) pstmtPet.close();
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -326,11 +355,11 @@ public class SolicitacaoDAO {
      * @throws SQLException Se houver erro na execução da query
      */
     public boolean recusar(int idSolicitacao, String justificativa) throws SQLException {
-        String sql = "UPDATE solicitacao_adocao SET data_resposta = ?, status = ?, justificativa = ? WHERE id = ?";
-
         if (justificativa == null || justificativa.trim().isEmpty()) {
             return false;
         }
+
+        String sql = "UPDATE solicitacao_adocao SET data_resposta = ?, status = ?, justificativa = ? WHERE id = ? AND status = 'PENDENTE'";
 
         try (Connection conn = ConexaoBD.getConexao();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
