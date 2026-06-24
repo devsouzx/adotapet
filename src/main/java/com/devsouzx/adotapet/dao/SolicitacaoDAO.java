@@ -11,8 +11,39 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe de acesso a dados para a entidade {@link SolicitacaoAdocao}.
+ *
+ * <p>Responsável pelas operações de CRUD (Create, Read, Update, Delete)
+ * no banco de dados para a tabela {@code solicitacao_adocao}.</p>
+ *
+ * <p>Métodos disponíveis:</p>
+ * <ul>
+ *   <li>{@link #inserir(SolicitacaoAdocao)} - Cria uma nova solicitação</li>
+ *   <li>{@link #buscarPorId(int)} - Busca uma solicitação pelo ID</li>
+ *   <li>{@link #listarPorAdotante(int)} - Lista solicitações de um adotante</li>
+ *   <li>{@link #listarPorPet(int)} - Lista solicitações de um pet</li>
+ *   <li>{@link #listarTodos()} - Lista todas as solicitações</li>
+ *   <li>{@link #atualizar(SolicitacaoAdocao)} - Atualiza uma solicitação</li>
+ *   <li>{@link #aprovar(int)} - Aprova uma solicitação</li>
+ *   <li>{@link #recusar(int, String)} - Recusa uma solicitação</li>
+ *   <li>{@link #excluir(int)} - Remove uma solicitação</li>
+ * </ul>
+ *
+ *
+ * @author Equipe Adoção de Pets
+ * @version 1.0
+ * @since 2026
+ * @see SolicitacaoAdocao
+ */
 public class SolicitacaoDAO {
 
+    /**
+     * Insere uma nova solicitação de adoção no banco de dados.
+     *
+     * @param solicitacao Objeto SolicitacaoAdocao a ser inserido
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void inserir(SolicitacaoAdocao solicitacao) throws SQLException {
         String sql = "INSERT INTO solicitacao_adocao (data_solicitacao, data_resposta, status, justificativa, adotante_id, pet_id) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -42,6 +73,12 @@ public class SolicitacaoDAO {
         }
     }
 
+    /**
+     * Busca uma solicitação pelo seu ID.
+     *
+     * @param id ID da solicitação
+     * @return Objeto SolicitacaoAdocao encontrado, ou {@code null} se não existir
+     */
     public SolicitacaoAdocao buscarPorId(int id) {
         String sql = "SELECT * FROM solicitacao_adocao WHERE id = ?";
         SolicitacaoAdocao solicitacao = null;
@@ -77,6 +114,12 @@ public class SolicitacaoDAO {
         return solicitacao;
     }
 
+    /**
+     * Lista todas as solicitações de um adotante específico.
+     *
+     * @param adotanteId ID do adotante
+     * @return Lista de solicitações do adotante
+     */
     public List<SolicitacaoAdocao> listarPorAdotante(int adotanteId) {
         List<SolicitacaoAdocao> lista = new ArrayList<>();
         String sql = "SELECT * FROM solicitacao_adocao WHERE adotante_id = ? ORDER BY data_solicitacao DESC";
@@ -115,6 +158,12 @@ public class SolicitacaoDAO {
         return lista;
     }
 
+    /**
+     * Lista todas as solicitações de um pet específico.
+     *
+     * @param petId ID do pet
+     * @return Lista de solicitações do pet
+     */
     public List<SolicitacaoAdocao> listarPorPet(int petId) {
         List<SolicitacaoAdocao> lista = new ArrayList<>();
         String sql = "SELECT * FROM solicitacao_adocao WHERE pet_id = ? ORDER BY data_solicitacao DESC";
@@ -153,6 +202,11 @@ public class SolicitacaoDAO {
         return lista;
     }
 
+    /**
+     * Lista todas as solicitações de adoção cadastradas.
+     *
+     * @return Lista de todas as solicitações
+     */
     public List<SolicitacaoAdocao> listarTodos() {
         List<SolicitacaoAdocao> lista = new ArrayList<>();
         String sql = "SELECT * FROM solicitacao_adocao ORDER BY data_solicitacao DESC";
@@ -189,49 +243,12 @@ public class SolicitacaoDAO {
         return lista;
     }
 
-    public List<SolicitacaoAdocao> listarPendentesPorAbrigo(int abrigoId) {
-        List<SolicitacaoAdocao> lista = new ArrayList<>();
-        String sql = """
-            SELECT s.* FROM solicitacao_adocao s
-            INNER JOIN pet p ON s.pet_id = p.id
-            WHERE p.abrigo_id = ? AND s.status = 'PENDENTE'
-            ORDER BY s.data_solicitacao ASC
-        """;
-
-        try (Connection conn = ConexaoBD.getConexao();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, abrigoId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    LocalDateTime dataSolicitacao = rs.getTimestamp("data_solicitacao").toLocalDateTime();
-                    LocalDateTime dataResposta = rs.getTimestamp("data_resposta") != null ?
-                            rs.getTimestamp("data_resposta").toLocalDateTime() : null;
-                    StatusSolicitacao status = StatusSolicitacao.valueOf(rs.getString("status"));
-                    String justificativa = rs.getString("justificativa");
-                    int adotanteId = rs.getInt("adotante_id");
-                    int petId = rs.getInt("pet_id");
-
-                    AdotanteDAO adotanteDAO = new AdotanteDAO();
-                    PetDAO petDAO = new PetDAO();
-
-                    Adotante adotante = adotanteDAO.buscarPorId(adotanteId);
-                    Pet pet = petDAO.buscarPorId(petId);
-
-                    SolicitacaoAdocao solicitacao = new SolicitacaoAdocao(
-                            id, dataSolicitacao, dataResposta, status, justificativa, adotante, pet
-                    );
-                    lista.add(solicitacao);
-                }
-            }
-
-        } catch (SQLException e) {
-            System.out.println("❌ Erro ao listar solicitações pendentes do abrigo: " + e.getMessage());
-        }
-        return lista;
-    }
-
+    /**
+     * Atualiza os dados de uma solicitação de adoção.
+     *
+     * @param solicitacao Objeto SolicitacaoAdocao com os dados atualizados
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void atualizar(SolicitacaoAdocao solicitacao) throws SQLException {
         String sql = "UPDATE solicitacao_adocao SET data_resposta = ?, status = ?, justificativa = ? WHERE id = ?";
 
@@ -252,6 +269,14 @@ public class SolicitacaoDAO {
         }
     }
 
+    /**
+     * Aprova uma solicitação de adoção.
+     * Altera o status da solicitação para APROVADA e o status do pet para ADOTADO.
+     *
+     * @param idSolicitacao ID da solicitação a ser aprovada
+     * @return {@code true} se aprovada com sucesso, {@code false} caso contrário
+     * @throws SQLException Se houver erro na execução da query
+     */
     public boolean aprovar(int idSolicitacao) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmtSolic = null;
@@ -292,6 +317,14 @@ public class SolicitacaoDAO {
         }
     }
 
+    /**
+     * Recusa uma solicitação de adoção com uma justificativa.
+     *
+     * @param idSolicitacao ID da solicitação a ser recusada
+     * @param justificativa Motivo da recusa
+     * @return {@code true} se recusada com sucesso, {@code false} caso contrário
+     * @throws SQLException Se houver erro na execução da query
+     */
     public boolean recusar(int idSolicitacao, String justificativa) throws SQLException {
         String sql = "UPDATE solicitacao_adocao SET data_resposta = ?, status = ?, justificativa = ? WHERE id = ?";
 
@@ -311,6 +344,13 @@ public class SolicitacaoDAO {
         }
     }
 
+    /**
+     * Exclui uma solicitação de adoção do sistema.
+     *
+     * @param id ID da solicitação a ser excluída
+     * @return {@code true} se excluída com sucesso, {@code false} caso contrário
+     * @throws SQLException Se houver erro na execução da query
+     */
     public boolean excluir(int id) throws SQLException {
         String sql = "DELETE FROM solicitacao_adocao WHERE id = ?";
 
@@ -322,6 +362,13 @@ public class SolicitacaoDAO {
         }
     }
 
+    /**
+     * Verifica se um pet possui solicitação pendente.
+     *
+     * @param petId ID do pet
+     * @return {@code true} se possui solicitação pendente, {@code false} caso contrário
+     * @throws SQLException Se houver erro na execução da query
+     */
     public boolean petPossuiSolicitacaoPendente(int petId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM solicitacao_adocao WHERE pet_id = ? AND status = 'PENDENTE'";
 
@@ -338,6 +385,14 @@ public class SolicitacaoDAO {
         return false;
     }
 
+    /**
+     * Verifica se um adotante já possui solicitação pendente para um pet específico.
+     *
+     * @param adotanteId ID do adotante
+     * @param petId ID do pet
+     * @return {@code true} se possui solicitação pendente, {@code false} caso contrário
+     * @throws SQLException Se houver erro na execução da query
+     */
     public boolean adotantePossuiSolicitacaoPendenteParaPet(int adotanteId, int petId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM solicitacao_adocao WHERE adotante_id = ? AND pet_id = ? AND status = 'PENDENTE'";
 
@@ -355,6 +410,13 @@ public class SolicitacaoDAO {
         return false;
     }
 
+    /**
+     * Conta quantas solicitações pendentes um adotante possui.
+     *
+     * @param adotanteId ID do adotante
+     * @return Número de solicitações pendentes
+     * @throws SQLException Se houver erro na execução da query
+     */
     public int contarSolicitacoesPendentesPorAdotante(int adotanteId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM solicitacao_adocao WHERE adotante_id = ? AND status = 'PENDENTE'";
 

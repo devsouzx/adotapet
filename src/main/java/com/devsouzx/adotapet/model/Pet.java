@@ -7,19 +7,66 @@ import com.devsouzx.adotapet.model.enums.StatusSolicitacao;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe que representa um pet disponível para adoção.
+ *
+ * <p>Um pet pertence a um abrigo e pode receber solicitações de adoção.
+ * Seu status pode ser "Disponível" ou "Adotado".</p>
+ *
+ * @author Equipe Adoção de Pets
+ * @version 1.0
+ * @since 2026
+ * @see Abrigo
+ * @see SolicitacaoAdocao
+ */
 public class Pet {
+
+    /** Identificador único do pet */
     private int id;
+
+    /** Nome do pet */
     private String nome;
+
+    /** Espécie do pet (Cachorro, Gato, Outro) */
     private String especie;
+
+    /** Raça do pet */
     private String raca;
+
+    /** Idade do pet em meses */
     private int idadeMeses;
+
+    /** Porte do pet (Pequeno, Médio, Grande) */
     private Porte porte;
+
+    /** Descrição detalhada do pet */
     private String descricao;
+
+    /** URL da foto do pet (opcional) */
     private String foto;
+
+    /** Status do pet (Disponível, Adotado) */
     private StatusPet status;
+
+    /** Abrigo responsável pelo pet */
     private Abrigo abrigo;
+
+    /** Lista de solicitações de adoção recebidas pelo pet */
     private List<SolicitacaoAdocao> solicitacoes;
 
+    /**
+     * Construtor para criar um novo pet.
+     * O pet é criado com status "Disponível" automaticamente.
+     *
+     * @param nome Nome do pet
+     * @param especie Espécie do pet
+     * @param raca Raça do pet
+     * @param idadeMeses Idade em meses
+     * @param porte Porte do pet
+     * @param descricao Descrição detalhada
+     * @param foto URL da foto (opcional)
+     * @param abrigo Abrigo responsável
+     */
     public Pet(String nome, String especie, String raca, int idadeMeses,
                Porte porte, String descricao, String foto, Abrigo abrigo) {
         this.nome = nome;
@@ -34,6 +81,20 @@ public class Pet {
         this.solicitacoes = new ArrayList<>();
     }
 
+    /**
+     * Construtor para criar um pet com ID pré-definido.
+     *
+     * @param id Identificador do pet
+     * @param nome Nome do pet
+     * @param especie Espécie do pet
+     * @param raca Raça do pet
+     * @param idadeMeses Idade em meses
+     * @param porte Porte do pet
+     * @param descricao Descrição detalhada
+     * @param foto URL da foto
+     * @param status Status do pet
+     * @param abrigo Abrigo responsável
+     */
     public Pet(int id, String nome, String especie, String raca, int idadeMeses,
                Porte porte, String descricao, String foto, StatusPet status, Abrigo abrigo) {
         this.id = id;
@@ -49,14 +110,28 @@ public class Pet {
         this.solicitacoes = new ArrayList<>();
     }
 
+    /**
+     * Verifica se o pet está disponível para adoção.
+     *
+     * @return {@code true} se o status for DISPONIVEL
+     */
     public boolean isDisponivel() {
         return status == StatusPet.DISPONIVEL;
     }
 
+    /**
+     * Marca o pet como adotado.
+     * Altera o status para ADOTADO.
+     */
     public void adotar() {
         this.status = StatusPet.ADOTADO;
     }
 
+    /**
+     * Verifica se o pet possui alguma solicitação pendente.
+     *
+     * @return {@code true} se houver solicitação com status PENDENTE
+     */
     public boolean temSolicitacaoPendente() {
         for (SolicitacaoAdocao sol : solicitacoes) {
             if (sol.getStatus() == StatusSolicitacao.PENDENTE) {
@@ -66,10 +141,16 @@ public class Pet {
         return false;
     }
 
+    /**
+     * Adiciona uma solicitação de adoção ao pet.
+     *
+     * @param solicitacao Solicitação a ser adicionada
+     */
     public void adicionarSolicitacao(SolicitacaoAdocao solicitacao) {
         solicitacoes.add(solicitacao);
     }
 
+    // Getters e Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getNome() { return nome; }

@@ -8,8 +8,36 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe de acesso a dados para a entidade {@link Adotante}.
+ *
+ * <p>Responsável pelas operações de CRUD (Create, Read, Update, Delete)
+ * no banco de dados para a tabela {@code adotante}.</p>
+ *
+ * <p>Métodos disponíveis:</p>
+ * <ul>
+ *   <li>{@link #inserir(Adotante)} - Cadastra um novo adotante</li>
+ *   <li>{@link #buscarPorId(int)} - Busca um adotante pelo ID</li>
+ *   <li>{@link #buscarPorEmail(String)} - Busca um adotante pelo e-mail</li>
+ *   <li>{@link #listarTodos()} - Lista todos os adotantes</li>
+ *   <li>{@link #atualizar(Adotante)} - Atualiza os dados de um adotante</li>
+ *   <li>{@link #excluir(int)} - Remove um adotante do sistema</li>
+ * </ul>
+ *
+ *
+ * @author Equipe Adoção de Pets
+ * @version 1.0
+ * @since 2026
+ * @see Adotante
+ */
 public class AdotanteDAO {
 
+    /**
+     * Insere um novo adotante no banco de dados.
+     *
+     * @param adotante Objeto Adotante a ser inserido
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void inserir(Adotante adotante) throws SQLException {
         String sql = "INSERT INTO adotante (nome, email, senha, telefone, cpf, data_nascimento, endereco_id, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -35,6 +63,12 @@ public class AdotanteDAO {
         }
     }
 
+    /**
+     * Busca um adotante pelo seu ID.
+     *
+     * @param id ID do adotante
+     * @return Objeto Adotante encontrado, ou {@code null} se não existir
+     */
     public Adotante buscarPorId(int id) {
         String sql = "SELECT * FROM adotante WHERE id = ?";
         Adotante adotante = null;
@@ -66,6 +100,12 @@ public class AdotanteDAO {
         return adotante;
     }
 
+    /**
+     * Busca um adotante pelo seu e-mail.
+     *
+     * @param email E-mail do adotante
+     * @return Objeto Adotante encontrado, ou {@code null} se não existir
+     */
     public Adotante buscarPorEmail(String email) {
         String sql = "SELECT * FROM adotante WHERE email = ?";
         Adotante adotante = null;
@@ -96,6 +136,11 @@ public class AdotanteDAO {
         return adotante;
     }
 
+    /**
+     * Lista todos os adotantes cadastrados.
+     *
+     * @return Lista de todos os adotantes
+     */
     public List<Adotante> listarTodos() {
         List<Adotante> lista = new ArrayList<>();
         String sql = "SELECT * FROM adotante";
@@ -113,7 +158,6 @@ public class AdotanteDAO {
                 String cpf = rs.getString("cpf");
                 Date dataNasc = rs.getDate("data_nascimento");
 
-                // Não buscar endereço aqui para evitar múltiplas conexões
                 Adotante adotante = new Adotante(id, nome, email, senha, telefone, cpf, dataNasc.toLocalDate(), null);
                 lista.add(adotante);
             }
@@ -124,6 +168,12 @@ public class AdotanteDAO {
         return lista;
     }
 
+    /**
+     * Atualiza os dados de um adotante existente.
+     *
+     * @param adotante Objeto Adotante com os dados atualizados
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void atualizar(Adotante adotante) throws SQLException {
         String sql = "UPDATE adotante SET nome = ?, email = ?, senha = ?, telefone = ?, cpf = ?, data_nascimento = ? WHERE id = ?";
 
@@ -142,6 +192,12 @@ public class AdotanteDAO {
         }
     }
 
+    /**
+     * Exclui um adotante do sistema pelo seu ID.
+     *
+     * @param id ID do adotante a ser excluído
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void excluir(int id) throws SQLException {
         String sql = "DELETE FROM adotante WHERE id = ?";
 

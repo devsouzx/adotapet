@@ -7,8 +7,27 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe de acesso a dados para a entidade {@link Endereco}.
+ *
+ * <p>Responsável pelas operações de CRUD (Create, Read, Update, Delete)
+ * no banco de dados para a tabela {@code endereco}.</p>
+ *
+ * <p>Esta classe é utilizada por {@link AdotanteDAO} e {@link AbrigoDAO}
+ * para gerenciar os endereços associados aos usuários do sistema.</p>
+ *
+ * @author Equipe Adoção de Pets
+ * @version 1.0
+ * @since 2026
+ * @see Endereco
+ */
 public class EnderecoDAO {
 
+    /**
+     * Insere um novo endereço no banco de dados.
+     *
+     * @param endereco Objeto Endereco a ser inserido
+     */
     public void inserir(Endereco endereco) {
         String sql = "INSERT INTO endereco (logradouro, numero, bairro, cidade, estado, cep) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -32,10 +51,16 @@ public class EnderecoDAO {
             System.out.println("Endereço inserido com sucesso! ID: " + endereco.getId());
 
         } catch (SQLException e) {
-            System.out.println("Erro ao inserir endereço: " + e.getMessage());
+            System.out.println("❌ Erro ao inserir endereço: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um endereço pelo seu ID.
+     *
+     * @param id ID do endereço
+     * @return Objeto Endereco encontrado, ou {@code null} se não existir
+     */
     public Endereco buscarPorId(int id) {
         String sql = "SELECT * FROM endereco WHERE id = ?";
 
@@ -58,11 +83,16 @@ public class EnderecoDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("Erro ao buscar endereço: " + e.getMessage());
+            System.out.println("❌ Erro ao buscar endereço: " + e.getMessage());
         }
         return null;
     }
 
+    /**
+     * Lista todos os endereços cadastrados.
+     *
+     * @return Lista de todos os endereços
+     */
     public List<Endereco> listarTodos() {
         List<Endereco> lista = new ArrayList<>();
         String sql = "SELECT * FROM endereco";
@@ -84,11 +114,16 @@ public class EnderecoDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("Erro ao listar endereços: " + e.getMessage());
+            System.out.println("❌ Erro ao listar endereços: " + e.getMessage());
         }
         return lista;
     }
 
+    /**
+     * Atualiza os dados de um endereço existente.
+     *
+     * @param endereco Objeto Endereco com os dados atualizados
+     */
     public void atualizar(Endereco endereco) {
         String sql = "UPDATE endereco SET logradouro = ?, numero = ?, bairro = ?, cidade = ?, estado = ?, cep = ? WHERE id = ?";
 
@@ -111,10 +146,15 @@ public class EnderecoDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("Erro ao atualizar endereço: " + e.getMessage());
+            System.out.println("❌ Erro ao atualizar endereço: " + e.getMessage());
         }
     }
 
+    /**
+     * Exclui um endereço do sistema pelo seu ID.
+     *
+     * @param id ID do endereço a ser excluído
+     */
     public void excluir(int id) {
         String sql = "DELETE FROM endereco WHERE id = ?";
 

@@ -8,8 +8,36 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe de acesso a dados para a entidade {@link Abrigo}.
+ *
+ * <p>Responsável pelas operações de CRUD (Create, Read, Update, Delete)
+ * no banco de dados para a tabela {@code abrigo}.</p>
+ *
+ * <p>Métodos disponíveis:</p>
+ * <ul>
+ *   <li>{@link #inserir(Abrigo)} - Cadastra um novo abrigo</li>
+ *   <li>{@link #buscarPorId(int)} - Busca um abrigo pelo ID</li>
+ *   <li>{@link #buscarPorEmail(String)} - Busca um abrigo pelo e-mail</li>
+ *   <li>{@link #listarTodos()} - Lista todos os abrigos</li>
+ *   <li>{@link #atualizar(Abrigo)} - Atualiza os dados de um abrigo</li>
+ *   <li>{@link #excluir(int)} - Remove um abrigo do sistema</li>
+ * </ul>
+ *
+ *
+ * @author Equipe Adoção de Pets
+ * @version 1.0
+ * @since 2026
+ * @see Abrigo
+ */
 public class AbrigoDAO {
 
+    /**
+     * Insere um novo abrigo no banco de dados.
+     *
+     * @param abrigo Objeto Abrigo a ser inserido
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void inserir(Abrigo abrigo) throws SQLException {
         String sql = "INSERT INTO abrigo (nome, email, senha, telefone, cnpj, nome_responsavel, horario_funcionamento, endereco_id, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -36,6 +64,12 @@ public class AbrigoDAO {
         }
     }
 
+    /**
+     * Busca um abrigo pelo seu ID.
+     *
+     * @param id ID do abrigo
+     * @return Objeto Abrigo encontrado, ou {@code null} se não existir
+     */
     public Abrigo buscarPorId(int id) {
         String sql = "SELECT * FROM abrigo WHERE id = ?";
         Abrigo abrigo = null;
@@ -68,6 +102,12 @@ public class AbrigoDAO {
         return abrigo;
     }
 
+    /**
+     * Busca um abrigo pelo seu e-mail.
+     *
+     * @param email E-mail do abrigo
+     * @return Objeto Abrigo encontrado, ou {@code null} se não existir
+     */
     public Abrigo buscarPorEmail(String email) {
         String sql = "SELECT * FROM abrigo WHERE email = ?";
         Abrigo abrigo = null;
@@ -100,6 +140,11 @@ public class AbrigoDAO {
         return abrigo;
     }
 
+    /**
+     * Lista todos os abrigos cadastrados.
+     *
+     * @return Lista de todos os abrigos
+     */
     public List<Abrigo> listarTodos() {
         List<Abrigo> lista = new ArrayList<>();
         String sql = "SELECT * FROM abrigo";
@@ -118,7 +163,6 @@ public class AbrigoDAO {
                 String nomeResponsavel = rs.getString("nome_responsavel");
                 String horarioFuncionamento = rs.getString("horario_funcionamento");
 
-                // Não buscar endereço aqui para evitar múltiplas conexões
                 Abrigo abrigo = new Abrigo(id, nome, email, senha, telefone, cnpj, nomeResponsavel, null);
                 abrigo.setHorarioFuncionamento(horarioFuncionamento);
                 lista.add(abrigo);
@@ -130,6 +174,12 @@ public class AbrigoDAO {
         return lista;
     }
 
+    /**
+     * Atualiza os dados de um abrigo existente.
+     *
+     * @param abrigo Objeto Abrigo com os dados atualizados
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void atualizar(Abrigo abrigo) throws SQLException {
         String sql = "UPDATE abrigo SET nome = ?, email = ?, senha = ?, telefone = ?, nome_responsavel = ?, horario_funcionamento = ? WHERE id = ?";
 
@@ -148,6 +198,12 @@ public class AbrigoDAO {
         }
     }
 
+    /**
+     * Exclui um abrigo do sistema pelo seu ID.
+     *
+     * @param id ID do abrigo a ser excluído
+     * @throws SQLException Se houver erro na execução da query
+     */
     public void excluir(int id) throws SQLException {
         String sql = "DELETE FROM abrigo WHERE id = ?";
 

@@ -19,20 +19,49 @@ import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Classe principal do sistema Adotapet.
+ * Responsável pela interface gráfica e interação com o usuário via JOptionPane.
+ *
+ * <p>O sistema permite que adotantes e abrigos realizem login, cadastro,
+ * gerenciem pets e solicitações de adoção.</p>
+ *
+ * @author Equipe Adoção de Pets
+ * @version 1.0
+ * @since 2026
+ */
 public class Main {
 
+    /** DAO para operações com Pets */
     private static final PetDAO petDAO = new PetDAO();
+
+    /** DAO para operações com Abrigos */
     private static final AbrigoDAO abrigoDAO = new AbrigoDAO();
+
+    /** DAO para operações com Adotantes */
     private static final AdotanteDAO adotanteDAO = new AdotanteDAO();
+
+    /** DAO para operações com Endereços */
     private static final EnderecoDAO enderecoDAO = new EnderecoDAO();
+
+    /** DAO para operações com Solicitações de Adoção */
     private static final SolicitacaoDAO solicitacaoDAO = new SolicitacaoDAO();
 
+    /**
+     * Ponto de entrada principal do sistema.
+     *
+     * @param args Argumentos da linha de comando (não utilizados)
+     */
     public static void main(String[] args) {
         ConexaoBD.testarConexao();
         exibirMenuPublico();
         ConexaoBD.fecharConexao();
     }
 
+    /**
+     * Exibe o menu público do sistema, acessível a qualquer visitante.
+     * Opções: Login, Cadastro, Visualização de Pets e Abrigos.
+     */
     private static void exibirMenuPublico() {
         while (true) {
             String opcao = JOptionPane.showInputDialog(
@@ -83,6 +112,11 @@ public class Main {
         }
     }
 
+    /**
+     * Exibe o menu específico para um adotante logado.
+     *
+     * @param adotante Adotante atualmente logado
+     */
     private static void exibirMenuAdotante(Adotante adotante) {
         while (true) {
             String opcao = JOptionPane.showInputDialog(
@@ -119,6 +153,11 @@ public class Main {
         }
     }
 
+    /**
+     * Exibe o menu específico para um abrigo logado.
+     *
+     * @param abrigo Abrigo atualmente logado
+     */
     private static void exibirMenuAbrigo(Abrigo abrigo) {
         while (true) {
             String opcao = JOptionPane.showInputDialog(
@@ -157,6 +196,11 @@ public class Main {
         }
     }
 
+    /**
+     * Realiza o login de um adotante.
+     *
+     * @return Objeto Adotante se autenticado, ou null se falhar
+     */
     private static Adotante loginAdotante() {
         String email = lerTexto("Email do adotante:");
         String senha = lerTexto("Senha:");
@@ -171,6 +215,11 @@ public class Main {
         return adotante;
     }
 
+    /**
+     * Realiza o login de um abrigo.
+     *
+     * @return Objeto Abrigo se autenticado, ou null se falhar
+     */
     private static Abrigo loginAbrigo() {
         String email = lerTexto("Email do abrigo:");
         String senha = lerTexto("Senha:");
@@ -185,16 +234,32 @@ public class Main {
         return abrigo;
     }
 
+    /**
+     * Lista todos os pets ou apenas os disponíveis.
+     *
+     * @param apenasDisponiveis true para listar apenas disponíveis, false para todos
+     */
     private static void listarPets(boolean apenasDisponiveis) {
         List<Pet> pets = apenasDisponiveis ? petDAO.listarDisponiveis() : petDAO.listarTodos();
         exibirPets(pets, "Nenhum pet encontrado.");
     }
 
+    /**
+     * Lista os pets de um abrigo específico.
+     *
+     * @param abrigo Abrigo cujos pets serão listados
+     */
     private static void listarPetsDoAbrigo(Abrigo abrigo) {
         List<Pet> pets = petDAO.listarPorAbrigo(abrigo.getId());
         exibirPets(pets, "Nenhum pet encontrado para este abrigo.");
     }
 
+    /**
+     * Exibe uma lista de pets em uma janela de diálogo.
+     *
+     * @param pets Lista de pets a ser exibida
+     * @param mensagemVazia Mensagem a ser exibida se a lista estiver vazia
+     */
     private static void exibirPets(List<Pet> pets, String mensagemVazia) {
         StringBuilder sb = new StringBuilder();
 
@@ -212,6 +277,9 @@ public class Main {
         JOptionPane.showMessageDialog(null, sb.length() == 0 ? mensagemVazia : sb.toString());
     }
 
+    /**
+     * Busca e exibe um pet pelo seu ID.
+     */
     private static void buscarPetPorId() {
         int id = lerInteiro("Digite o ID do pet:");
         Pet pet = petDAO.buscarPorId(id);
@@ -235,6 +303,9 @@ public class Main {
                         "\nAbrigo: " + abrigo);
     }
 
+    /**
+     * Lista todos os abrigos cadastrados.
+     */
     private static void listarAbrigos() {
         List<Abrigo> abrigos = abrigoDAO.listarTodos();
         StringBuilder sb = new StringBuilder();
@@ -253,6 +324,11 @@ public class Main {
                 sb.length() == 0 ? "Nenhum abrigo encontrado." : sb.toString());
     }
 
+    /**
+     * Cadastra um novo adotante no sistema.
+     *
+     * @throws Exception Se algum dado obrigatório estiver faltando
+     */
     private static void cadastrarAdotante() throws Exception {
         JTextField nome = new JTextField();
         JTextField email = new JTextField();
@@ -311,6 +387,11 @@ public class Main {
         JOptionPane.showMessageDialog(null, "Adotante cadastrado com ID: " + adotante.getId());
     }
 
+    /**
+     * Cadastra um novo abrigo no sistema.
+     *
+     * @throws Exception Se algum dado obrigatório estiver faltando
+     */
     private static void cadastrarAbrigo() throws Exception {
         JTextField nome = new JTextField();
         JTextField email = new JTextField();
@@ -371,6 +452,11 @@ public class Main {
         JOptionPane.showMessageDialog(null, "Abrigo cadastrado com ID: " + abrigo.getId());
     }
 
+    /**
+     * Cadastra um novo endereço.
+     *
+     * @return Endereço criado
+     */
     private static Endereco cadastrarEndereco() {
         Endereco endereco = new Endereco(
                 lerTexto("Logradouro:"),
@@ -384,6 +470,12 @@ public class Main {
         return endereco;
     }
 
+    /**
+     * Cadastra um novo pet para um abrigo.
+     *
+     * @param abrigo Abrigo responsável pelo pet
+     * @throws Exception Se algum dado obrigatório estiver faltando
+     */
     private static void cadastrarPet(Abrigo abrigo) throws Exception {
         JTextField nome = new JTextField();
         JComboBox<String> especie = new JComboBox<>(new String[]{"CACHORRO", "GATO", "OUTRO"});
@@ -422,6 +514,12 @@ public class Main {
         JOptionPane.showMessageDialog(null, "Pet cadastrado com ID: " + pet.getId());
     }
 
+    /**
+     * Realiza uma solicitação de adoção para um pet.
+     *
+     * @param adotante Adotante solicitante
+     * @throws Exception Se houver erro na solicitação
+     */
     private static void solicitarAdocao(Adotante adotante) throws Exception {
         int petId = lerInteiro("ID do pet:");
         Pet pet = petDAO.buscarPorId(petId);
@@ -458,11 +556,21 @@ public class Main {
         JOptionPane.showMessageDialog(null, "Solicitacao criada com ID: " + solicitacao.getId());
     }
 
+    /**
+     * Lista as solicitações de um adotante.
+     *
+     * @param adotante Adotante cujas solicitações serão listadas
+     */
     private static void listarSolicitacoesDoAdotante(Adotante adotante) {
         List<SolicitacaoAdocao> solicitacoes = solicitacaoDAO.listarPorAdotante(adotante.getId());
         exibirSolicitacoes(solicitacoes, "Nenhuma solicitacao encontrada para este adotante.");
     }
 
+    /**
+     * Lista as solicitações recebidas por um abrigo.
+     *
+     * @param abrigo Abrigo que recebeu as solicitações
+     */
     private static void listarSolicitacoesDoAbrigo(Abrigo abrigo) {
         List<SolicitacaoAdocao> solicitacoes = solicitacaoDAO.listarTodos().stream()
                 .filter(solicitacao -> pertenceAoAbrigo(solicitacao, abrigo))
@@ -470,6 +578,12 @@ public class Main {
         exibirSolicitacoes(solicitacoes, "Nenhuma solicitacao encontrada para este abrigo.");
     }
 
+    /**
+     * Exibe uma lista de solicitações em uma janela de diálogo.
+     *
+     * @param solicitacoes Lista de solicitações a ser exibida
+     * @param mensagemVazia Mensagem a ser exibida se a lista estiver vazia
+     */
     private static void exibirSolicitacoes(List<SolicitacaoAdocao> solicitacoes, String mensagemVazia) {
         StringBuilder sb = new StringBuilder();
 
@@ -493,6 +607,12 @@ public class Main {
         JOptionPane.showMessageDialog(null, sb.length() == 0 ? mensagemVazia : sb.toString());
     }
 
+    /**
+     * Cancela uma solicitação de adoção pendente.
+     *
+     * @param adotante Adotante que deseja cancelar a solicitação
+     * @throws Exception Se houver erro no cancelamento
+     */
     private static void cancelarSolicitacao(Adotante adotante) throws Exception {
         int id = lerInteiro("ID da solicitacao:");
         SolicitacaoAdocao solicitacao = solicitacaoDAO.buscarPorId(id);
@@ -515,6 +635,12 @@ public class Main {
         JOptionPane.showMessageDialog(null, "Solicitacao cancelada.");
     }
 
+    /**
+     * Aprova uma solicitação de adoção pendente.
+     *
+     * @param abrigo Abrigo que está aprovando a solicitação
+     * @throws Exception Se houver erro na aprovação
+     */
     private static void aprovarSolicitacao(Abrigo abrigo) throws Exception {
         int id = lerInteiro("ID da solicitacao:");
         SolicitacaoAdocao solicitacao = solicitacaoDAO.buscarPorId(id);
@@ -529,6 +655,12 @@ public class Main {
                 aprovada ? "Solicitacao aprovada e pet marcado como adotado." : "Nao foi possivel aprovar a solicitacao.");
     }
 
+    /**
+     * Recusa uma solicitação de adoção pendente.
+     *
+     * @param abrigo Abrigo que está recusando a solicitação
+     * @throws Exception Se houver erro na recusa
+     */
     private static void recusarSolicitacao(Abrigo abrigo) throws Exception {
         int id = lerInteiro("ID da solicitacao:");
         SolicitacaoAdocao solicitacao = solicitacaoDAO.buscarPorId(id);
@@ -544,6 +676,12 @@ public class Main {
                 recusada ? "Solicitacao recusada." : "Nao foi possivel recusar a solicitacao.");
     }
 
+    /**
+     * Remove um pet do sistema.
+     *
+     * @param abrigo Abrigo dono do pet
+     * @throws Exception Se houver erro na remoção
+     */
     private static void removerPet(Abrigo abrigo) throws Exception {
         int petId = lerInteiro("ID do pet:");
         Pet pet = petDAO.buscarPorId(petId);
@@ -562,12 +700,26 @@ public class Main {
         JOptionPane.showMessageDialog(null, "Pet removido.");
     }
 
+    /**
+     * Verifica se um abrigo pode responder a uma solicitação.
+     *
+     * @param solicitacao Solicitação a ser verificada
+     * @param abrigo Abrigo que deseja responder
+     * @return true se o abrigo pode responder, false caso contrário
+     */
     private static boolean podeAbrigoResponder(SolicitacaoAdocao solicitacao, Abrigo abrigo) {
         return solicitacao != null
                 && solicitacao.getStatus() == StatusSolicitacao.PENDENTE
                 && pertenceAoAbrigo(solicitacao, abrigo);
     }
 
+    /**
+     * Verifica se uma solicitação pertence a um abrigo específico.
+     *
+     * @param solicitacao Solicitação a ser verificada
+     * @param abrigo Abrigo a ser verificado
+     * @return true se a solicitação pertence ao abrigo, false caso contrário
+     */
     private static boolean pertenceAoAbrigo(SolicitacaoAdocao solicitacao, Abrigo abrigo) {
         return solicitacao != null
                 && solicitacao.getPet() != null
@@ -575,6 +727,13 @@ public class Main {
                 && solicitacao.getPet().getAbrigo().getId() == abrigo.getId();
     }
 
+    /**
+     * Lê um texto do usuário via JOptionPane.
+     *
+     * @param mensagem Mensagem a ser exibida
+     * @return Texto digitado pelo usuário
+     * @throws IllegalArgumentException Se o campo estiver vazio
+     */
     private static String lerTexto(String mensagem) {
         String valor = JOptionPane.showInputDialog(mensagem);
         if (valor == null || valor.trim().isEmpty()) {
@@ -583,6 +742,12 @@ public class Main {
         return valor.trim();
     }
 
+    /**
+     * Cria um painel de formulário com pares de label e componente.
+     *
+     * @param campos Pares de (label, componente) em sequência
+     * @return JPanel com o formulário
+     */
     private static JPanel criarFormulario(Object... campos) {
         JPanel painel = new JPanel(new GridLayout(campos.length / 2, 2, 8, 6));
 
@@ -594,11 +759,26 @@ public class Main {
         return painel;
     }
 
+    /**
+     * Exibe um formulário em uma janela de diálogo e aguarda confirmação.
+     *
+     * @param titulo Título da janela
+     * @param painel Painel do formulário
+     * @return true se o usuário clicou em OK, false se cancelou
+     */
     private static boolean confirmarFormulario(String titulo, JPanel painel) {
         return JOptionPane.showConfirmDialog(null, painel, titulo, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE)
                 == JOptionPane.OK_OPTION;
     }
 
+    /**
+     * Obtém o texto de um JTextField e valida se não está vazio.
+     *
+     * @param campo JTextField a ser lido
+     * @param nomeCampo Nome do campo para mensagem de erro
+     * @return Texto do campo
+     * @throws IllegalArgumentException Se o campo estiver vazio
+     */
     private static String textoObrigatorio(JTextField campo, String nomeCampo) {
         String valor = campo.getText().trim();
         if (valor.isEmpty()) {
@@ -607,6 +787,14 @@ public class Main {
         return valor;
     }
 
+    /**
+     * Obtém a senha de um JPasswordField e valida se não está vazia.
+     *
+     * @param campo JPasswordField a ser lido
+     * @param nomeCampo Nome do campo para mensagem de erro
+     * @return Senha digitada
+     * @throws IllegalArgumentException Se o campo estiver vazio
+     */
     private static String textoObrigatorio(JPasswordField campo, String nomeCampo) {
         String valor = new String(campo.getPassword()).trim();
         if (valor.isEmpty()) {
@@ -615,14 +803,35 @@ public class Main {
         return valor;
     }
 
+    /**
+     * Obtém e valida a UF (estado) de um JTextField.
+     *
+     * @param campo JTextField com a UF
+     * @return UF em maiúsculas
+     * @throws IllegalArgumentException Se a UF não tiver 2 caracteres
+     */
     private static String textoUF(JTextField campo) {
         return validarUF(textoObrigatorio(campo, "Estado"));
     }
 
+    /**
+     * Lê e valida a UF (estado) do usuário.
+     *
+     * @param mensagem Mensagem a ser exibida
+     * @return UF em maiúsculas
+     * @throws IllegalArgumentException Se a UF não tiver 2 caracteres
+     */
     private static String lerUF(String mensagem) {
         return validarUF(lerTexto(mensagem));
     }
 
+    /**
+     * Valida se uma string é uma UF válida (2 letras).
+     *
+     * @param valor String a ser validada
+     * @return UF em maiúsculas
+     * @throws IllegalArgumentException Se a UF não tiver 2 caracteres
+     */
     private static String validarUF(String valor) {
         String uf = valor.trim().toUpperCase();
         if (uf.length() != 2) {
@@ -631,6 +840,12 @@ public class Main {
         return uf;
     }
 
+    /**
+     * Salva um endereço no banco de dados.
+     *
+     * @param endereco Endereço a ser salvo
+     * @throws IllegalStateException Se o endereço não for salvo
+     */
     private static void salvarEndereco(Endereco endereco) {
         enderecoDAO.inserir(endereco);
         if (endereco.getId() <= 0) {
@@ -638,6 +853,13 @@ public class Main {
         }
     }
 
+    /**
+     * Lê um número inteiro do usuário.
+     *
+     * @param mensagem Mensagem a ser exibida
+     * @return Número inteiro digitado
+     * @throws NumberFormatException Se o valor não for um número válido
+     */
     private static int lerInteiro(String mensagem) {
         return Integer.parseInt(lerTexto(mensagem));
     }
