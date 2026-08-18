@@ -4,7 +4,7 @@ CREATE TABLE abrigo (
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
-    cnpj VARCHAR(14) NOT NULL UNIQUE,
+    cnpj VARCHAR(14) UNIQUE,
     horario_funcionamento VARCHAR(255),
     descricao TEXT,
     foto_url TEXT,
