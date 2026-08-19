@@ -25,7 +25,8 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("login-auth")
                     .withSubject(abrigo.getEmail())
-                    .withIssuedAt(this.generateExpirationTime())
+                    .withIssuedAt(Instant.now())
+                    .withExpiresAt(this.generateExpirationTime())
                     .sign(algorithm);
         } catch (JWTCreationException e) {
             throw new RuntimeException("Erro ao autenticar");
