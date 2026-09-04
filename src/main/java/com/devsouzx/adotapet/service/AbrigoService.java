@@ -132,4 +132,31 @@ public class AbrigoService {
     public Abrigo getAbrigoByEmail(String email) throws Exception {
         return abrigoRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
     }
+
+    public AbrigoInfoResponse getAbrigoInfoById(UUID id) {
+        Abrigo abrigo = abrigoRepository.findById(id).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
+
+        return AbrigoInfoResponse.builder()
+                .nome(abrigo.getNome())
+                .email(abrigo.getEmail())
+                .cnpj(abrigo.getCnpj())
+                .telefone(abrigo.getTelefone())
+                .horarioFuncionamento(abrigo.getHorarioFuncionamento())
+                .descricao(abrigo.getDescricao())
+                .fotoUrl(abrigo.getFotoUrl())
+                .ativo(abrigo.isAtivo())
+                .dataCadastro(abrigo.getDataCadastro())
+                .endereco(
+                        EnderecoResponse.builder()
+                                .logradouro(abrigo.getEndereco().getLogradouro())
+                                .cep(abrigo.getEndereco().getCep())
+                                .cep(abrigo.getEndereco().getCep())
+                                .numero(abrigo.getEndereco().getNumero())
+                                .bairro(abrigo.getEndereco().getBairro())
+                                .cidade(abrigo.getEndereco().getCidade())
+                                .estado(abrigo.getEndereco().getEstado())
+                                .build()
+                )
+                .build();
+    }
 }

@@ -32,22 +32,11 @@ public class AuthenticationController {
         return ResponseEntity.badRequest().build();
     }
 
-    @PostMapping("/cadastro")
+    @PostMapping("/register")
     public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody @Valid RegisterRequestDTO request) {
         Abrigo abrigo = abrigoService.salvarAbrigoDTO(request);
         String token = this.tokenService.generateToken(abrigo);
         return ResponseEntity.ok(new AuthenticationResponseDTO(abrigo.getNome(), token));
-    }
-
-
-    @PostMapping("/atualizar-senha")
-    public ResponseEntity<?> recuperarSenha(
-            @AuthenticationPrincipal Abrigo abrigo,
-            @RequestBody UserPasswordUpdateRequest request
-            ) {
-        UUID userIdentifier = abrigo.getId();
-        abrigoService.atualizarSenha(request, userIdentifier);
-        return ResponseEntity.ok("Senha atualizada");
     }
 
     @GetMapping(value = "/request-password-reset/")
