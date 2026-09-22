@@ -10,12 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/abrigo")
 @RequiredArgsConstructor
-public abstract class AbrigoController implements IAbrigoController {
+public class AbrigoController implements IAbrigoController {
     private final AbrigoService iAbrigoService;
 
     @GetMapping
@@ -31,5 +32,11 @@ public abstract class AbrigoController implements IAbrigoController {
     @PutMapping("/editar")
     public ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(@AuthenticationPrincipal Abrigo abrigo, @RequestBody AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
             return ResponseEntity.ok(iAbrigoService.updateAbrigoInfo(abrigo.getId(), abrigoUpdateRequest));
+    }
+
+    @GetMapping("/proximos")
+    public ResponseEntity<List<AbrigoInfoResponse>> getAbrigosProximos(@RequestParam("latitude") double latitude, @RequestParam("longitude") double longitude, @RequestParam(name = "raio", defaultValue = "10.0") double raio) {
+        List<AbrigoInfoResponse> abrigosProximos = iAbrigoService.getAbrigosProximos(latitude, longitude, raio);
+        return ResponseEntity.ok(abrigosProximos);
     }
 }

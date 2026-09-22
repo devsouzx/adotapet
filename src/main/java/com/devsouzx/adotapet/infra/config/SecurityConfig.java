@@ -29,8 +29,7 @@ public class SecurityConfig {
                         AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                        auth -> auth.requestMatchers("/abrigo")
-                                .authenticated()
+                        auth -> auth.requestMatchers("/abrigo").permitAll()
                                 .requestMatchers("/abrigo/editar").authenticated()
                                 .anyRequest().permitAll())
                 .addFilterBefore(

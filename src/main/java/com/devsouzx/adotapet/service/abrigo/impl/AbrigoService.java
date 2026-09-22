@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -177,5 +178,33 @@ public class AbrigoService implements IAbrigoService {
         abrigo.setFotoUrl(abrigoUpdateRequest.fotoUrl());
         abrigo.setTelefone(abrigoUpdateRequest.telefone());
         return getAbrigoInfoById(id);
+    }
+
+    public List<AbrigoInfoResponse> getAbrigosProximos(double latitude, double longitude, double raio) {
+        raio = raio * 1000;
+        List<Abrigo> abrigos = abrigoRepository.findAbrigosProximos(latitude, longitude, raio);
+
+        return abrigos.stream().map(abrigo -> AbrigoInfoResponse.builder()
+                .nome(abrigo.getNome())
+                .email(abrigo.getEmail())
+                .cnpj(abrigo.getCnpj())
+                .telefone(abrigo.getTelefone())
+                .horarioFuncionamento(abrigo.getHorarioFuncionamento())
+                .descricao(abrigo.getDescricao())
+                .fotoUrl(abrigo.getFotoUrl())
+                .ativo(abrigo.isAtivo())
+                .dataCadastro(abrigo.getDataCadastro())
+                .endereco(
+                        EnderecoResponse.builder()
+                                .logradouro(abrigo.getEndereco().getLogradouro())
+                                .cep(abrigo.getEndereco().getCep())
+                                .cep(abrigo.getEndereco().getCep())
+                                .numero(abrigo.getEndereco().getNumero())
+                                .bairro(abrigo.getEndereco().getBairro())
+                                .cidade(abrigo.getEndereco().getCidade())
+                                .estado(abrigo.getEndereco().getEstado())
+                                .build()
+                )
+                .build()).toList();
     }
 }
