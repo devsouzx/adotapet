@@ -45,7 +45,7 @@ public class AuthenticationController implements IAuthenticationController {
 
     @GetMapping(value = "/request-password-reset/")
     public ResponseEntity<Void> sendRequestPasswordResetEmail(@RequestBody UserRequestResetPasswordRequest request) throws Exception {
-        abrigoService.sendPassswordResetEmail(request.getEmail());
+        abrigoService.sendPassswordResetEmail(request.email());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

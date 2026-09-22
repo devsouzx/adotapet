@@ -104,8 +104,7 @@ public class AbrigoService implements IAbrigoService {
 
         trySendKafkaMessage(userResetPasswordResponse.toString(), "abrigo-reset-password");
         Abrigo abrigo = getAbrigoByEmail(email);
-        String resetPasswordUrl = "http://localhost:8080/auth/resetpassword/?id=" + abrigo.getId() + "&hash=" + userResetPasswordResponse.getResetPasswordCode();
-        log.error(resetPasswordUrl);
+        String resetPasswordUrl = "http://localhost:8080/auth/resetpassword/?id=" + abrigo.getId() + "&hash=" + userResetPasswordResponse.resetPasswordCode();
     }
 
     @Transactional
@@ -115,12 +114,12 @@ public class AbrigoService implements IAbrigoService {
         UserResetPasswordResponse userResetPasswordResponse = (UserResetPasswordResponse) redisService.getValue("PASSWORDREQUEST_" + abrigo.getEmail(), UserResetPasswordResponse.class);
         if (userResetPasswordResponse == null) throw new Exception("UserResetPasswordResponse does not exists");
 
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) throw new IllegalArgumentException("The passwords you entered were not identical. Please try again.");
+        if (!request.newPassword().equals(request.confirmPassword())) throw new IllegalArgumentException("The passwords you entered were not identical. Please try again.");
 
-        abrigo.setSenha(passwordEncoder.encode(request.getConfirmPassword()));
+        abrigo.setSenha(passwordEncoder.encode(request.confirmPassword()));
         abrigoRepository.save(abrigo);
 
-        redisService.removeKey("PASSWORDREQUEST_" + userResetPasswordResponse.getEmail());
+        redisService.removeKey("PASSWORDREQUEST_" + userResetPasswordResponse.email());
     }
 
     @Transactional
