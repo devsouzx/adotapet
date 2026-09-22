@@ -1,10 +1,17 @@
-package com.devsouzx.adotapet.service;
+package com.devsouzx.adotapet.service.abrigo.impl;
 
 import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import com.devsouzx.adotapet.domain.endereco.Endereco;
-import com.devsouzx.adotapet.dto.*;
+import com.devsouzx.adotapet.dto.request.AbrigoUpdateRequest;
+import com.devsouzx.adotapet.dto.request.RegisterRequest;
+import com.devsouzx.adotapet.dto.request.UserPasswordUpdateRequest;
+import com.devsouzx.adotapet.dto.request.UserResetPasswordRequest;
+import com.devsouzx.adotapet.dto.response.AbrigoInfoResponse;
+import com.devsouzx.adotapet.dto.response.EnderecoResponse;
+import com.devsouzx.adotapet.dto.response.UserResetPasswordResponse;
 import com.devsouzx.adotapet.repository.AbrigoRepository;
 import com.devsouzx.adotapet.repository.EnderecoRepository;
+import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
 import com.devsouzx.adotapet.service.redis.RedisService;
 import com.devsouzx.adotapet.util.RandomNumberUtil;
 import jakarta.transaction.Transactional;
@@ -23,18 +30,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AbrigoService {
+public class AbrigoService implements IAbrigoService {
     private final AbrigoRepository abrigoRepository;
     private final PasswordEncoder passwordEncoder;
     private final EnderecoRepository enderecoRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final RedisService redisService;
 
-    public Abrigo findByEmail(String email) {
-        return abrigoRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Abrigo não encontrado!"));
-    }
-
-    public Abrigo salvarAbrigoDTO(RegisterRequestDTO request) {
+    public Abrigo salvarAbrigoDTO(RegisterRequest request) {
         Abrigo abrigo = new Abrigo();
         abrigo.setNome(request.nome());
         abrigo.setEmail(request.email());
@@ -133,8 +136,12 @@ public class AbrigoService {
         return abrigoRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
     }
 
-    public AbrigoInfoResponse getAbrigoInfoById(UUID id) {
-        Abrigo abrigo = abrigoRepository.findById(id).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
+    public Abrigo getAbrigoById(UUID identifier) throws Exception {
+        return abrigoRepository.findById(identifier).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
+    }
+
+    public AbrigoInfoResponse getAbrigoInfoById(UUID id) throws Exception {
+        Abrigo abrigo = getAbrigoById(id);
 
         return AbrigoInfoResponse.builder()
                 .nome(abrigo.getNome())
@@ -158,5 +165,17 @@ public class AbrigoService {
                                 .build()
                 )
                 .build();
+    }
+
+    public AbrigoInfoResponse updateAbrigoInfo(UUID id, AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
+        Abrigo abrigo =  getAbrigoById(id);
+
+        abrigo.setNome(abrigoUpdateRequest.nome());
+        abrigo.setCnpj(abrigoUpdateRequest.cnpj());
+        abrigo.setHorarioFuncionamento(abrigoUpdateRequest.horarioFuncionamento());
+        abrigo.setDescricao(abrigoUpdateRequest.descricao());
+        abrigo.setFotoUrl(abrigoUpdateRequest.fotoUrl());
+        abrigo.setTelefone(abrigoUpdateRequest.telefone());
+        return getAbrigoInfoById(id);
     }
 }

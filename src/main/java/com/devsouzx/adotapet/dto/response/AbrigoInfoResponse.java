@@ -1,5 +1,6 @@
-package com.devsouzx.adotapet.dto;
+package com.devsouzx.adotapet.dto.response;
 
+import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

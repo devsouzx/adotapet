@@ -1,6 +1,6 @@
-package com.devsouzx.adotapet.dto;
+package com.devsouzx.adotapet.dto.request;
 
-public record RegisterRequestDTO(
+public record RegisterRequest(
         String nome,
         String email,
         String senha,
@@ -10,6 +10,6 @@ public record RegisterRequestDTO(
         String horarioFuncionamento,
         String descricao,
         String fotoUrl,
-        EnderecoRequestDTO endereco
+        EnderecoRequest endereco
 ) {
 }

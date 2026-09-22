@@ -1,4 +1,4 @@
-package com.devsouzx.adotapet.dto;
+package com.devsouzx.adotapet.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

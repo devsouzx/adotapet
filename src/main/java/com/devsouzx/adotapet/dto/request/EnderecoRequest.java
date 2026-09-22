@@ -1,9 +1,6 @@
-package com.devsouzx.adotapet.dto;
+package com.devsouzx.adotapet.dto.request;
 
-import lombok.Builder;
-
-@Builder
-public record EnderecoResponse(
+public record EnderecoRequest(
         String logradouro,
         String cep,
         String numero,

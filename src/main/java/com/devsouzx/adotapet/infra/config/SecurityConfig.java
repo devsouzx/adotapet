@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth.requestMatchers("/abrigo")
                                 .authenticated()
+                                .requestMatchers("/abrigo/editar").authenticated()
                                 .anyRequest().permitAll())
                 .addFilterBefore(
                         jwtFilterChain,

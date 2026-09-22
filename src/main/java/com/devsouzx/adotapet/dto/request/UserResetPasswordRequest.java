@@ -1,4 +1,4 @@
-package com.devsouzx.adotapet.dto;
+package com.devsouzx.adotapet.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
