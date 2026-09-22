@@ -1,9 +1,11 @@
 package com.devsouzx.adotapet.service.abrigo;
 
 import com.devsouzx.adotapet.domain.abrigo.Abrigo;
+import com.devsouzx.adotapet.dto.request.RegisterRequest;
 import com.devsouzx.adotapet.dto.response.AbrigoInfoResponse;
 import com.devsouzx.adotapet.dto.request.AbrigoUpdateRequest;
 import com.devsouzx.adotapet.dto.request.UserResetPasswordRequest;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,4 +18,5 @@ public interface IAbrigoService {
     AbrigoInfoResponse getAbrigoInfoById(UUID id) throws Exception;
     AbrigoInfoResponse updateAbrigoInfo(UUID id, AbrigoUpdateRequest abrigoUpdateRequest) throws Exception;
     List<AbrigoInfoResponse> getAbrigosProximos(double latitude, double longitude, double raio);
+    Abrigo salvarAbrigoDTO(RegisterRequest request);
 }
