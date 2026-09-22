@@ -4,7 +4,7 @@ import com.devsouzx.adotapet.controller.abrigo.IAbrigoController;
 import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import com.devsouzx.adotapet.dto.response.AbrigoInfoResponse;
 import com.devsouzx.adotapet.dto.request.AbrigoUpdateRequest;
-import com.devsouzx.adotapet.service.abrigo.impl.AbrigoService;
+import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequestMapping("/abrigo")
 @RequiredArgsConstructor
 public class AbrigoController implements IAbrigoController {
-    private final AbrigoService iAbrigoService;
+    private final IAbrigoService iAbrigoService;
 
     @GetMapping
     public ResponseEntity<AbrigoInfoResponse> getAbrigoLoggedInfo(@AuthenticationPrincipal Abrigo abrigo) throws Exception {

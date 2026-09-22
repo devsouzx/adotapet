@@ -8,7 +8,7 @@ import com.devsouzx.adotapet.dto.request.UserRequestResetPasswordRequest;
 import com.devsouzx.adotapet.dto.request.UserResetPasswordRequest;
 import com.devsouzx.adotapet.dto.response.AuthenticationResponse;
 import com.devsouzx.adotapet.infra.config.TokenService;
-import com.devsouzx.adotapet.service.abrigo.impl.AbrigoService;
+import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,13 +22,13 @@ import java.util.UUID;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController implements IAuthenticationController {
-    private final AbrigoService abrigoService;
+    private final IAbrigoService iabrigoService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody @Valid LoginRequest request) throws Exception {
-        Abrigo abrigo = abrigoService.getAbrigoByEmail(request.email());
+        Abrigo abrigo = iabrigoService.getAbrigoByEmail(request.email());
         if (passwordEncoder.matches(request.senha(), abrigo.getSenha())) {
             String token = this.tokenService.generateToken(abrigo);
             return ResponseEntity.ok(new AuthenticationResponse(abrigo.getNome(), token));
@@ -38,14 +38,14 @@ public class AuthenticationController implements IAuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody @Valid RegisterRequest request) {
-        Abrigo abrigo = abrigoService.salvarAbrigoDTO(request);
+        Abrigo abrigo = iabrigoService.salvarAbrigoDTO(request);
         String token = this.tokenService.generateToken(abrigo);
         return ResponseEntity.ok(new AuthenticationResponse(abrigo.getNome(), token));
     }
 
     @GetMapping(value = "/request-password-reset/")
     public ResponseEntity<Void> sendRequestPasswordResetEmail(@RequestBody UserRequestResetPasswordRequest request) throws Exception {
-        abrigoService.sendPassswordResetEmail(request.email());
+        iabrigoService.sendPassswordResetEmail(request.email());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -53,7 +53,7 @@ public class AuthenticationController implements IAuthenticationController {
     public ResponseEntity<Void> resetPassword(@RequestParam("id") UUID id,
                                               @RequestParam("hash") String code,
                                               @RequestBody UserResetPasswordRequest request) throws Exception {
-        abrigoService.resetPassword(request, id, code);
+        iabrigoService.resetPassword(request, id, code);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
