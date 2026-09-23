@@ -31,7 +31,7 @@ public class AbrigoController implements IAbrigoController {
 
     @PutMapping("/editar")
     public ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(@AuthenticationPrincipal Abrigo abrigo, @RequestBody AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
-            return ResponseEntity.ok(iAbrigoService.updateAbrigoInfo(abrigo.getId(), abrigoUpdateRequest));
+            return ResponseEntity.ok(iAbrigoService.updateAbrigo(abrigo.getId(), abrigoUpdateRequest));
     }
 
     @GetMapping("/proximos")
