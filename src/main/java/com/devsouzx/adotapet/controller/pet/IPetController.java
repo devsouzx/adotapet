@@ -7,8 +7,10 @@ import com.devsouzx.adotapet.dto.response.PetResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface IPetController {
     ResponseEntity<List<PetInfoResponse>> getPets();
     ResponseEntity<PetResponse> createPet(Abrigo abrigo, PetRequest petRequest);
+    ResponseEntity<PetResponse> getPetById(UUID id);
 }

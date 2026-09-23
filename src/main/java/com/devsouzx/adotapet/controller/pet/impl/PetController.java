@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,4 +31,12 @@ public class PetController implements IPetController {
         PetResponse pet = iPetService.createPet(petRequest, abrigo);
         return ResponseEntity.ok(pet);
     }
+
+    @GetMapping("/{identifier}")
+    public ResponseEntity<PetResponse> getPetById(@PathVariable UUID identifier) {
+        PetResponse pet = iPetService.getPetById(identifier);
+        return ResponseEntity.ok(pet);
+    }
+
+
 }

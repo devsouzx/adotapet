@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -66,6 +67,26 @@ public class PetService implements IPetService {
                 .build();
 
         petRepository.save(pet);
+        return new PetResponse(
+                pet.getId(),
+                pet.getNome(),
+                pet.getEspecie(),
+                pet.getRaca(),
+                pet.getDescricao(),
+                pet.getIdadeEstimadaMeses(),
+                pet.getPeso(),
+                pet.getFotoUrl(),
+                pet.getDataCadastro(),
+                pet.getStatus(),
+                pet.getSexo(),
+                pet.getPorte(),
+                pet.getAbrigo()
+        );
+    }
+
+    @Override
+    public PetResponse getPetById(UUID identifier) {
+        Pet pet = petRepository.findById(identifier).orElseThrow(() -> new RuntimeException("Pet not found"));
         return new PetResponse(
                 pet.getId(),
                 pet.getNome(),

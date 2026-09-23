@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface IPetService {
     List<PetInfoResponse> getPets();;
     PetResponse createPet(PetRequest petRequest, Abrigo abrigo);
+    PetResponse getPetById(UUID identifier);
 }
