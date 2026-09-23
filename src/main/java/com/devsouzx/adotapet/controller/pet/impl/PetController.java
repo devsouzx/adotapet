@@ -7,10 +7,12 @@ import com.devsouzx.adotapet.dto.response.PetInfoResponse;
 import com.devsouzx.adotapet.dto.response.PetResponse;
 import com.devsouzx.adotapet.service.pet.IPetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,5 +50,22 @@ public class PetController implements IPetController {
     public ResponseEntity<Void> deletePet(@AuthenticationPrincipal Abrigo abrigo, @PathVariable("identifier") UUID petId) {
         iPetService.removePet(petId, abrigo);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filtros")
+    public ResponseEntity<Page<PetResponse>> getPetByFiltros(
+            @RequestParam(name = "nome", required = false) String nome,
+            @RequestParam(name = "especie", required = false) String especie,
+            @RequestParam(name = "raca", required = false) String raca,
+            @RequestParam(name = "idadeEstimadaMeses", required = false) Integer idadeEstimadaMeses,
+            @RequestParam(name = "peso", required = false) BigDecimal peso,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "sexo", required = false) String sexo,
+            @RequestParam(name = "porte", required = false) String porte,
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
+    ) {
+        Page<PetResponse> pet = iPetService.getPetByFiltros(nome, especie, raca, idadeEstimadaMeses, peso, status, sexo, porte, page, size);
+        return ResponseEntity.ok(pet);
     }
 }

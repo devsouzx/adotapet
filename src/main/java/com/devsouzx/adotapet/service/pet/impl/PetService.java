@@ -11,6 +11,8 @@ import com.devsouzx.adotapet.dto.response.PetResponse;
 import com.devsouzx.adotapet.repository.PetRepository;
 import com.devsouzx.adotapet.service.pet.IPetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -126,5 +128,26 @@ public class PetService implements IPetService {
         }
 
         petRepository.delete(pet);
+    }
+
+    @Override
+    public Page<PetResponse> getPetByFiltros(String nome, String especie, String raca, Integer idadeEstimadaMeses, BigDecimal peso, String status, String sexo, String porte, Integer page, Integer size) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("page deve ser >= 0 e size deve estar entre 1 e 100");
+        }
+
+        Page<Pet> pets = petRepository.findByFiltros(
+                nome,
+                especie,
+                raca,
+                idadeEstimadaMeses,
+                peso,
+                status,
+                sexo,
+                porte,
+                PageRequest.of(page, size)
+        );
+
+        return pets.map(this::toPetResponse);
     }
 }
