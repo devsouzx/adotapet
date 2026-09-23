@@ -15,4 +15,5 @@ public interface IPetService {
     PetResponse getPetById(UUID identifier);
     PetResponse updatePet(UUID petId, PetRequest petRequest, Abrigo abrigo);
     PetResponse toPetResponse(Pet pet);
+    void removePet(UUID petId, Abrigo abrigo);
 }

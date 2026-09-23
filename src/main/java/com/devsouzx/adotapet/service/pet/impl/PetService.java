@@ -116,4 +116,15 @@ public class PetService implements IPetService {
                 pet.getAbrigo()
         );
     }
+
+    @Override
+    public void removePet(UUID petId, Abrigo abrigo) {
+        Pet pet = petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+
+        if (!pet.getAbrigo().getId().equals(abrigo.getId())) {
+            throw new RuntimeException("You do not have permission to remove this pet");
+        }
+
+        petRepository.delete(pet);
+    }
 }

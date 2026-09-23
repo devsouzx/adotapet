@@ -43,4 +43,10 @@ public class PetController implements IPetController {
         PetResponse pet = iPetService.updatePet(petId, petRequest, abrigo);
         return ResponseEntity.ok(pet);
     }
+
+    @DeleteMapping("/{identifier}/remover")
+    public ResponseEntity<Void> deletePet(@AuthenticationPrincipal Abrigo abrigo, @PathVariable("identifier") UUID petId) {
+        iPetService.removePet(petId, abrigo);
+        return ResponseEntity.noContent().build();
+    }
 }
