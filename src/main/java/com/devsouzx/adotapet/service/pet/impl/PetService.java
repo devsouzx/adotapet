@@ -10,16 +10,12 @@ import com.devsouzx.adotapet.dto.response.PetInfoResponse;
 import com.devsouzx.adotapet.dto.response.PetResponse;
 import com.devsouzx.adotapet.repository.PetRepository;
 import com.devsouzx.adotapet.service.pet.IPetService;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.common.metrics.Stat;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -67,26 +63,43 @@ public class PetService implements IPetService {
                 .build();
 
         petRepository.save(pet);
-        return new PetResponse(
-                pet.getId(),
-                pet.getNome(),
-                pet.getEspecie(),
-                pet.getRaca(),
-                pet.getDescricao(),
-                pet.getIdadeEstimadaMeses(),
-                pet.getPeso(),
-                pet.getFotoUrl(),
-                pet.getDataCadastro(),
-                pet.getStatus(),
-                pet.getSexo(),
-                pet.getPorte(),
-                pet.getAbrigo()
-        );
+        return toPetResponse(pet);
     }
 
     @Override
     public PetResponse getPetById(UUID identifier) {
         Pet pet = petRepository.findById(identifier).orElseThrow(() -> new RuntimeException("Pet not found"));
+
+        return toPetResponse(pet);
+    }
+
+    @Override
+    public PetResponse updatePet(UUID petId, PetRequest petRequest, Abrigo abrigo) {
+        Pet pet = petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+
+        if (!pet.getAbrigo().getId().equals(abrigo.getId())) {
+            throw new RuntimeException("You do not have permission to update this pet");
+        }
+
+        pet.setId(petId);
+        pet.setNome(petRequest.nome());
+        pet.setEspecie(petRequest.especie());
+        pet.setRaca(petRequest.raca());
+        pet.setDescricao(petRequest.descricao());
+        pet.setIdadeEstimadaMeses(petRequest.idadeEstimadaMeses());
+        pet.setPeso(petRequest.peso());
+        pet.setFotoUrl(petRequest.fotoUrl());
+        pet.setStatus(StatusPet.fromString(petRequest.status()));
+        pet.setSexo(SexoPet.fromString(petRequest.sexo()));
+        pet.setPorte(PortePet.fromString(petRequest.porte()));
+        pet.setAbrigo(abrigo);
+
+        petRepository.save(pet);
+        return toPetResponse(pet);
+    }
+
+    @Override
+    public PetResponse toPetResponse(Pet pet) {
         return new PetResponse(
                 pet.getId(),
                 pet.getNome(),

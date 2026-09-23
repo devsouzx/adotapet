@@ -1,11 +1,6 @@
 package com.devsouzx.adotapet.dto.request;
 
-import com.devsouzx.adotapet.domain.pet.PortePet;
-import com.devsouzx.adotapet.domain.pet.SexoPet;
-import com.devsouzx.adotapet.domain.pet.StatusPet;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public record PetRequest(
         String nome,

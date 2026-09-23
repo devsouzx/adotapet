@@ -26,7 +26,7 @@ public class PetController implements IPetController {
         return ResponseEntity.ok(pets);
     }
 
-    @PostMapping
+    @PostMapping("/novo")
     public ResponseEntity<PetResponse> createPet(@AuthenticationPrincipal Abrigo abrigo, @RequestBody PetRequest petRequest) {
         PetResponse pet = iPetService.createPet(petRequest, abrigo);
         return ResponseEntity.ok(pet);
@@ -38,5 +38,9 @@ public class PetController implements IPetController {
         return ResponseEntity.ok(pet);
     }
 
-
+    @PutMapping("/{identifier}/editar")
+    public ResponseEntity<PetResponse> updatePet(@AuthenticationPrincipal Abrigo abrigo, @PathVariable("identifier") UUID petId, @RequestBody PetRequest petRequest) {
+        PetResponse pet = iPetService.updatePet(petId, petRequest, abrigo);
+        return ResponseEntity.ok(pet);
+    }
 }

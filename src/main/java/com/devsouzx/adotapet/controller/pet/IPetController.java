@@ -13,4 +13,5 @@ public interface IPetController {
     ResponseEntity<List<PetInfoResponse>> getPets();
     ResponseEntity<PetResponse> createPet(Abrigo abrigo, PetRequest petRequest);
     ResponseEntity<PetResponse> getPetById(UUID id);
+    ResponseEntity<PetResponse> updatePet(Abrigo abrigo, UUID petId, PetRequest petRequest);
 }
