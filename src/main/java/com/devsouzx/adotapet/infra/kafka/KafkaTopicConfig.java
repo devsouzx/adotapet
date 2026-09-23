@@ -1,4 +1,4 @@
-package com.devsouzx.adotapet.infra.config.kafka;
+package com.devsouzx.adotapet.infra.kafka;
 
 import org.springframework.context.annotation.Configuration;
 import org.apache.kafka.clients.admin.NewTopic;

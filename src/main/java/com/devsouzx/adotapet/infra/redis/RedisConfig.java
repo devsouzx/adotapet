@@ -1,4 +1,4 @@
-package com.devsouzx.adotapet.infra.config.redis;
+package com.devsouzx.adotapet.infra.redis;
 
 import com.devsouzx.adotapet.properties.RedisProperties;
 import lombok.AllArgsConstructor;
