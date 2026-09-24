@@ -12,6 +12,8 @@ import com.devsouzx.adotapet.repository.EnderecoRepository;
 import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -131,10 +133,10 @@ public class AbrigoService implements IAbrigoService {
         return getAbrigoInfoById(id);
     }
 
-    public List<AbrigoInfoResponse> getAbrigosProximos(double latitude, double longitude, double raio) {
+    public Page<AbrigoInfoResponse> getAbrigosProximos(double latitude, double longitude, double raio, Integer page, Integer size) {
         raio = raio * 1000;
-        List<Abrigo> abrigos = abrigoRepository.findAbrigosProximos(latitude, longitude, raio);
+        Page<Abrigo> abrigos = abrigoRepository.findAbrigosProximos(latitude, longitude, raio, PageRequest.of(page, size));
 
-        return abrigos.stream().map(this::toResponse).toList();
+        return abrigos.map(this::toResponse);
     }
 }

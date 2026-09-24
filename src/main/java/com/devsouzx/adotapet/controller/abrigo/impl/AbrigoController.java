@@ -6,11 +6,11 @@ import com.devsouzx.adotapet.dto.response.AbrigoInfoResponse;
 import com.devsouzx.adotapet.dto.request.AbrigoUpdateRequest;
 import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -35,8 +35,14 @@ public class AbrigoController implements IAbrigoController {
     }
 
     @GetMapping("/proximos")
-    public ResponseEntity<List<AbrigoInfoResponse>> getAbrigosProximos(@RequestParam("latitude") double latitude, @RequestParam("longitude") double longitude, @RequestParam(name = "raio", defaultValue = "10.0") double raio) {
-        List<AbrigoInfoResponse> abrigosProximos = iAbrigoService.getAbrigosProximos(latitude, longitude, raio);
+    public ResponseEntity<Page<AbrigoInfoResponse>> getAbrigosProximos(
+            @RequestParam("latitude") double latitude,
+            @RequestParam("longitude") double longitude,
+            @RequestParam(name = "raio", defaultValue = "10.0") double raio,
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
+    ) {
+        Page<AbrigoInfoResponse> abrigosProximos = iAbrigoService.getAbrigosProximos(latitude, longitude, raio, page, size);
         return ResponseEntity.ok(abrigosProximos);
     }
 }

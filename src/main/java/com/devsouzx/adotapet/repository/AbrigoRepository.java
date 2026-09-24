@@ -1,6 +1,8 @@
 package com.devsouzx.adotapet.repository;
 
 import com.devsouzx.adotapet.domain.abrigo.Abrigo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,8 +28,10 @@ public interface AbrigoRepository extends JpaRepository<Abrigo, UUID> {
                   :raio
               )
             """, nativeQuery = true)
-    List<Abrigo> findAbrigosProximos(
+    Page<Abrigo> findAbrigosProximos(
             @Param("latitude") double latitude,
             @Param("longitude") double longitude,
-            @Param("raio") double raio);
+            @Param("raio") double raio,
+            Pageable pageable
+    );
 }
