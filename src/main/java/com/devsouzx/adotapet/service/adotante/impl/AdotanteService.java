@@ -5,18 +5,20 @@ import com.devsouzx.adotapet.dto.request.AdotanteRequest;
 import com.devsouzx.adotapet.dto.response.AdotanteResponse;
 import com.devsouzx.adotapet.repository.AdotanteRepository;
 import com.devsouzx.adotapet.service.adotante.IAdotanteService;
+import com.devsouzx.adotapet.service.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class AdotanteService implements IAdotanteService {
     private final AdotanteRepository adotanteRepository;
+    private final RedisService redisService;
 
     @Override
     public Page<AdotanteResponse> getAdotantes(Integer page, Integer size) {
@@ -46,19 +48,27 @@ public class AdotanteService implements IAdotanteService {
                 .build();
 
         adotante = adotanteRepository.save(adotante);
+        AdotanteResponse adotanteResponse = toResponse(adotante);
+        redisService.setValue("ADOTANTE_" + adotante.getId(), adotanteResponse, TimeUnit.MILLISECONDS, 600000L);
 
-        return toResponse(adotante);
+        return adotanteResponse;
     }
 
     @Override
     public AdotanteResponse getAdotanteById(UUID adotanteId) {
-        Adotante adotante = adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
-        return toResponse(adotante);
+        AdotanteResponse adotanteResponse = (AdotanteResponse) redisService.getValue("ADOTANTE_" + adotanteId, AdotanteResponse.class);
+        if (adotanteResponse == null) {
+            Adotante adotante = findById(adotanteId);;
+            adotanteResponse = toResponse(adotante);
+            redisService.setValue("ADOTANTE_" + adotante.getId(), adotanteResponse, TimeUnit.MILLISECONDS, 600000L);
+        }
+
+        return adotanteResponse;
     }
 
     @Override
     public AdotanteResponse updateAdotante(UUID adotanteId, AdotanteRequest adotanteRequest) {
-        Adotante adotante = adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
+        Adotante adotante = findById(adotanteId);;
 
         adotante.setId(adotante.getId());
         adotante.setNome(adotanteRequest.nome());
@@ -73,7 +83,11 @@ public class AdotanteService implements IAdotanteService {
 
     @Override
     public void deleteAdotante(UUID adotanteId) {
-        Adotante adotante = adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
+        Adotante adotante = findById(adotanteId);
         adotanteRepository.delete(adotante);
+    }
+
+    private Adotante findById(UUID adotanteId) {
+        return adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
     }
 }
