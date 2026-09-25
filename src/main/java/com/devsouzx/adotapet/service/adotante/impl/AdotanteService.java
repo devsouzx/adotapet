@@ -70,4 +70,10 @@ public class AdotanteService implements IAdotanteService {
 
         return toResponse(adotante);
     }
+
+    @Override
+    public void deleteAdotante(UUID adotanteId) {
+        Adotante adotante = adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
+        adotanteRepository.delete(adotante);
+    }
 }

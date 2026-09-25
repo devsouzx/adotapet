@@ -43,4 +43,9 @@ public class AdotanteController implements IAdotanteController {
         return ResponseEntity.ok(adotanteResponse);
     }
 
+    @DeleteMapping("/{adotanteId}")
+    public ResponseEntity<Void> deleteAdotante(@PathVariable UUID adotanteId) {
+        iAdotanteService.deleteAdotante(adotanteId);
+        return ResponseEntity.noContent().build();
+    }
 }

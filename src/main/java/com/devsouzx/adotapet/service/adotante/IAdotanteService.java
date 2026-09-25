@@ -13,4 +13,5 @@ public interface IAdotanteService {
     AdotanteResponse createAdotante(AdotanteRequest adotanteRequest);
     AdotanteResponse getAdotanteById(UUID adotanteId);
     AdotanteResponse updateAdotante(UUID adotanteId, AdotanteRequest adotanteRequest);
+    void deleteAdotante(UUID adotanteId);
 }

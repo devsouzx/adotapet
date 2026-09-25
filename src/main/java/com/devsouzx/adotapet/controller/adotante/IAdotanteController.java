@@ -13,4 +13,5 @@ public interface IAdotanteController {
     ResponseEntity<AdotanteResponse> createAdotante(Abrigo abrigo, AdotanteRequest adotanteRequest);
     ResponseEntity<AdotanteResponse> getAdotanteById(UUID adotanteId);
     ResponseEntity<AdotanteResponse> updateAdotante(UUID adotanteId, AdotanteRequest adotanteRequest);
+    ResponseEntity<Void> deleteAdotante(UUID adotanteId);
 }
