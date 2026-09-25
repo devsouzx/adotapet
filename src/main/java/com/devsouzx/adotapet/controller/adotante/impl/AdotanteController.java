@@ -37,5 +37,10 @@ public class AdotanteController implements IAdotanteController {
         return ResponseEntity.ok(adotanteResponse);
     }
 
+    @PutMapping("/{adotanteId}")
+    public ResponseEntity<AdotanteResponse> updateAdotante(@PathVariable UUID adotanteId, @RequestBody AdotanteRequest adotanteRequest) {
+        AdotanteResponse adotanteResponse = iAdotanteService.updateAdotante(adotanteId, adotanteRequest);
+        return ResponseEntity.ok(adotanteResponse);
+    }
 
 }

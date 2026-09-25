@@ -52,9 +52,22 @@ public class AdotanteService implements IAdotanteService {
 
     @Override
     public AdotanteResponse getAdotanteById(UUID adotanteId) {
-        Adotante adotante = adotanteRepository.findById(adotanteId).orElseThrow(() -> {
-            throw new RuntimeException("Adotante não encontrado");
-        });
+        Adotante adotante = adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
+        return toResponse(adotante);
+    }
+
+    @Override
+    public AdotanteResponse updateAdotante(UUID adotanteId, AdotanteRequest adotanteRequest) {
+        Adotante adotante = adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
+
+        adotante.setId(adotante.getId());
+        adotante.setNome(adotanteRequest.nome());
+        adotante.setTelefone(adotanteRequest.telefone());
+        adotante.setEmail(adotanteRequest.email());
+        adotante.setDataNascimento(adotanteRequest.dataNascimento());
+
+        adotante = adotanteRepository.save(adotante);
+
         return toResponse(adotante);
     }
 }
