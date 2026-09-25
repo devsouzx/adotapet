@@ -137,13 +137,8 @@ public class AbrigoService implements IAbrigoService {
 
     public Page<AbrigoInfoResponse> getAbrigosProximos(double latitude, double longitude, double raio, Integer page, Integer size) {
         raio *= 1000;
-        Page<AbrigoInfoResponse> abrigoInfoResponses = redisService.getValue("ABRIGOSPROXIMOS_" + latitude + "_" + longitude + "_" + raio + "_" + page + "_" + size, Page.class);
-        if (abrigoInfoResponses == null) {
-            Page<Abrigo> abrigos = abrigoRepository.findAbrigosProximos(latitude, longitude, raio, PageRequest.of(page, size));
-            abrigoInfoResponses = abrigos.map(this::toResponse);
-            redisService.setValue("ABRIGOSPROXIMOS_" + latitude + "_" + longitude + "_" + raio + "_" + page + "_" + size, abrigoInfoResponses, TimeUnit.MILLISECONDS, 60000L);
-        }
+        Page<Abrigo> abrigos = abrigoRepository.findAbrigosProximos(latitude, longitude, raio, PageRequest.of(page, size));
 
-        return abrigoInfoResponses;
+        return abrigos.map(this::toResponse);
     }
 }
