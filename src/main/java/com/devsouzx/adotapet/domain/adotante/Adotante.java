@@ -4,10 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,6 +12,7 @@ import java.util.UUID;
 @Table(name = "adotante")
 @Entity
 @Setter
+@Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +21,7 @@ public class Adotante {
     @GeneratedValue
     private UUID id;
     private String nome;
-    private String telefone;
     private String email;
+    private String telefone;
     private LocalDate dataNascimento;
 }
