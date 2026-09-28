@@ -5,7 +5,6 @@ import com.devsouzx.adotapet.dto.request.UserResetPasswordRequest;
 import com.devsouzx.adotapet.dto.response.UserResetPasswordResponse;
 import com.devsouzx.adotapet.repository.AbrigoRepository;
 import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
-import com.devsouzx.adotapet.service.abrigo.impl.AbrigoService;
 import com.devsouzx.adotapet.service.authentication.IAuthenticationService;
 import com.devsouzx.adotapet.service.redis.RedisService;
 import com.devsouzx.adotapet.util.RandomNumberUtil;
@@ -15,7 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -28,13 +30,18 @@ public class AuthenticationService implements IAuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final IAbrigoService iAbrigoService;
     private final AbrigoRepository abrigoRepository;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public void sendPassswordResetEmail(String email) throws Exception {
+        Abrigo abrigo = iAbrigoService.getAbrigoByEmail(email);
         UserResetPasswordResponse userResetPasswordResponse =
                 (UserResetPasswordResponse) redisService.getValue("PASSWORDREQUEST_" + email, UserResetPasswordResponse.class);
-        if (userResetPasswordResponse == null) {
+        if (userResetPasswordResponse == null
+                || !abrigo.getId().equals(userResetPasswordResponse.abrigoId())
+                || !email.equals(userResetPasswordResponse.email())) {
             userResetPasswordResponse = UserResetPasswordResponse.builder()
+                    .abrigoId(abrigo.getId())
                     .email(email)
                     .resetPasswordCode(RandomNumberUtil.generateRandomCode())
                     .build();
@@ -42,9 +49,7 @@ public class AuthenticationService implements IAuthenticationService {
             redisService.setValue("PASSWORDREQUEST_" + email, userResetPasswordResponse, TimeUnit.MILLISECONDS, 1800000L);
         }
 
-        trySendKafkaMessage(userResetPasswordResponse.toString(), "abrigo-reset-password");
-        Abrigo abrigo = iAbrigoService.getAbrigoByEmail(email);
-        String resetPasswordUrl = "http://localhost:8080/auth/resetpassword/?id=" + abrigo.getId() + "&hash=" + userResetPasswordResponse.resetPasswordCode();
+        trySendKafkaMessage(objectMapper.writeValueAsString(userResetPasswordResponse), "abrigo-reset-password");
     }
 
     @Transactional
@@ -60,15 +65,17 @@ public class AuthenticationService implements IAuthenticationService {
         abrigoRepository.save(abrigo);
 
         redisService.removeKey("PASSWORDREQUEST_" + userResetPasswordResponse.email());
+        redisService.removeKey("ABRIGO_" + abrigo.getId());
+        redisService.removeKey("ABRIGO_" + abrigo.getEmail());
     }
 
-    @Transactional
-    private void trySendKafkaMessage(String email, String TOPIC) throws Exception {
+    private void trySendKafkaMessage(String message, String topic) throws Exception {
         try {
-            kafkaTemplate.send(TOPIC, email);
-            log.error("Mensagem enviada com SUCESSO para o tópico: {}", TOPIC);
+            kafkaTemplate.send(topic, message).get();
+            log.info("Mensagem enviada com sucesso para o tópico: {}", topic);
         } catch (Exception e) {
-            log.error("Erro ao enviar mensagem para o topico {}", TOPIC);
+            log.error("Erro ao enviar mensagem para o tópico {}", topic, e);
+            throw e;
         }
     }
 }

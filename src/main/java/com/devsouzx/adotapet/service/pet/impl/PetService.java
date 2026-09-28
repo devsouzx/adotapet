@@ -6,6 +6,7 @@ import com.devsouzx.adotapet.domain.pet.PortePet;
 import com.devsouzx.adotapet.domain.pet.SexoPet;
 import com.devsouzx.adotapet.domain.pet.StatusPet;
 import com.devsouzx.adotapet.dto.request.PetRequest;
+import com.devsouzx.adotapet.dto.response.AbrigoResumoResponse;
 import com.devsouzx.adotapet.dto.response.PetInfoResponse;
 import com.devsouzx.adotapet.dto.response.PetResponse;
 import com.devsouzx.adotapet.repository.PetRepository;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -42,7 +44,7 @@ public class PetService implements IPetService {
                         pet.getStatus(),
                         pet.getSexo(),
                         pet.getPorte(),
-                        pet.getAbrigo()
+                        toAbrigoResumo(pet.getAbrigo())
                 ))
                 .toList();
     }
@@ -115,8 +117,12 @@ public class PetService implements IPetService {
                 pet.getStatus(),
                 pet.getSexo(),
                 pet.getPorte(),
-                pet.getAbrigo()
+                toAbrigoResumo(pet.getAbrigo())
         );
+    }
+
+    private AbrigoResumoResponse toAbrigoResumo(Abrigo abrigo) {
+        return new AbrigoResumoResponse(abrigo.getId(), abrigo.getNome());
     }
 
     @Override
@@ -142,9 +148,9 @@ public class PetService implements IPetService {
                 raca,
                 idadeEstimadaMeses,
                 peso,
-                status,
-                sexo,
-                porte,
+                status == null || status.isBlank() ? null : status.trim(),
+                sexo == null || sexo.isBlank() ? null : sexo.trim(),
+                porte == null || porte.isBlank() ? null : porte.trim(),
                 PageRequest.of(page, size)
         );
 

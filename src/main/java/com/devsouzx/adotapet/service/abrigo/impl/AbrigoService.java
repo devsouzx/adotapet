@@ -4,7 +4,6 @@ import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import com.devsouzx.adotapet.domain.endereco.Endereco;
 import com.devsouzx.adotapet.dto.request.AbrigoUpdateRequest;
 import com.devsouzx.adotapet.dto.request.RegisterRequest;
-import com.devsouzx.adotapet.dto.request.UserPasswordUpdateRequest;
 import com.devsouzx.adotapet.dto.response.AbrigoInfoResponse;
 import com.devsouzx.adotapet.dto.response.EnderecoResponse;
 import com.devsouzx.adotapet.repository.AbrigoRepository;
@@ -18,9 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +43,7 @@ public class AbrigoService implements IAbrigoService {
             abrigo.setCnpj(request.cnpj());
         }
         abrigo.setHorarioFuncionamento(request.horarioFuncionamento());
+        abrigo.setDescricao(request.descricao());
         if (request.fotoUrl() != null) {
             abrigo.setFotoUrl(request.fotoUrl());
         }
@@ -58,8 +56,8 @@ public class AbrigoService implements IAbrigoService {
         endereco.setEstado(request.endereco().estado());
         endereco.setNumero(request.endereco().numero());
         endereco.setCidade(request.endereco().cidade());
-        endereco.setLongitude(new BigDecimal("-16.6869"));
-        endereco.setLatitude(new BigDecimal("-16.6869"));
+        endereco.setLongitude(request.endereco().longitude());
+        endereco.setLatitude(request.endereco().latitude());
 
         endereco = enderecoRepository.save(endereco);
         abrigo.setEndereco(endereco);
@@ -85,7 +83,6 @@ public class AbrigoService implements IAbrigoService {
                 .endereco(
                         EnderecoResponse.builder()
                                 .logradouro(abrigo.getEndereco().getLogradouro())
-                                .cep(abrigo.getEndereco().getCep())
                                 .cep(abrigo.getEndereco().getCep())
                                 .numero(abrigo.getEndereco().getNumero())
                                 .bairro(abrigo.getEndereco().getBairro())
@@ -123,8 +120,16 @@ public class AbrigoService implements IAbrigoService {
     public AbrigoInfoResponse updateAbrigo(UUID id, AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
         Abrigo abrigo =  getAbrigoById(id);
 
-        abrigo.setId(abrigo.getId());
         abrigo.setNome(abrigoUpdateRequest.nome());
+        String emailAnterior = abrigo.getEmail();
+        if (abrigoUpdateRequest.email() != null && !abrigoUpdateRequest.email().equals(emailAnterior)) {
+            abrigoRepository.findByEmail(abrigoUpdateRequest.email())
+                    .filter(outroAbrigo -> !outroAbrigo.getId().equals(id))
+                    .ifPresent(outroAbrigo -> {
+                        throw new IllegalArgumentException("Esse e-mail já está cadastrado");
+                    });
+            abrigo.setEmail(abrigoUpdateRequest.email());
+        }
         abrigo.setCnpj(abrigoUpdateRequest.cnpj());
         abrigo.setHorarioFuncionamento(abrigoUpdateRequest.horarioFuncionamento());
         abrigo.setDescricao(abrigoUpdateRequest.descricao());
@@ -132,10 +137,20 @@ public class AbrigoService implements IAbrigoService {
         abrigo.setTelefone(abrigoUpdateRequest.telefone());
 
         abrigo = abrigoRepository.save(abrigo);
+        redisService.removeKey("ABRIGO_" + id);
+        redisService.removeKey("ABRIGO_" + emailAnterior);
+        redisService.removeKey("ABRIGO_" + abrigo.getEmail());
         return toResponse(abrigo);
     }
 
     public Page<AbrigoInfoResponse> getAbrigosProximos(double latitude, double longitude, double raio, Integer page, Integer size) {
+        if (!Double.isFinite(latitude) || !Double.isFinite(longitude)
+                || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("Latitude ou longitude fora do intervalo permitido");
+        }
+        if (!Double.isFinite(raio) || raio <= 0 || page == null || page < 0 || size == null || size < 1 || size > 100) {
+            throw new IllegalArgumentException("Raio deve ser positivo, page >= 0 e size deve estar entre 1 e 100");
+        }
         raio *= 1000;
         Page<Abrigo> abrigos = abrigoRepository.findAbrigosProximos(latitude, longitude, raio, PageRequest.of(page, size));
 

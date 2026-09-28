@@ -26,7 +26,7 @@ public class Abrigo {
     private String horarioFuncionamento;
     private String descricao;
     private String fotoUrl;
-    private boolean ativo;
+    private boolean ativo = true;
     private LocalDateTime dataCadastro;
 
     @OneToOne

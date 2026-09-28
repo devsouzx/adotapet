@@ -1,6 +1,5 @@
 package com.devsouzx.adotapet.dto.response;
 
-import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import com.devsouzx.adotapet.domain.pet.PortePet;
 import com.devsouzx.adotapet.domain.pet.SexoPet;
 import com.devsouzx.adotapet.domain.pet.StatusPet;
@@ -20,6 +19,6 @@ public record PetInfoResponse(
         StatusPet status,
         SexoPet sexo,
         PortePet porte,
-        Abrigo abrigo
+        AbrigoResumoResponse abrigo
 ) {
 }

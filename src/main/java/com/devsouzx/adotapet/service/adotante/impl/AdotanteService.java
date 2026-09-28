@@ -22,6 +22,9 @@ public class AdotanteService implements IAdotanteService {
 
     @Override
     public Page<AdotanteResponse> getAdotantes(Integer page, Integer size) {
+        if (page == null || page < 0 || size == null || size < 1 || size > 100) {
+            throw new IllegalArgumentException("page deve ser >= 0 e size deve estar entre 1 e 100");
+        }
         Page<Adotante> adotantes = adotanteRepository.findAll(PageRequest.of(page, size));
 
         return adotantes.map(this::toResponse);
@@ -58,7 +61,7 @@ public class AdotanteService implements IAdotanteService {
     public AdotanteResponse getAdotanteById(UUID adotanteId) {
         AdotanteResponse adotanteResponse = (AdotanteResponse) redisService.getValue("ADOTANTE_" + adotanteId, AdotanteResponse.class);
         if (adotanteResponse == null) {
-            Adotante adotante = findById(adotanteId);;
+            Adotante adotante = findById(adotanteId);
             adotanteResponse = toResponse(adotante);
             redisService.setValue("ADOTANTE_" + adotante.getId(), adotanteResponse, TimeUnit.MILLISECONDS, 600000L);
         }
@@ -68,15 +71,15 @@ public class AdotanteService implements IAdotanteService {
 
     @Override
     public AdotanteResponse updateAdotante(UUID adotanteId, AdotanteRequest adotanteRequest) {
-        Adotante adotante = findById(adotanteId);;
+        Adotante adotante = findById(adotanteId);
 
-        adotante.setId(adotante.getId());
         adotante.setNome(adotanteRequest.nome());
         adotante.setTelefone(adotanteRequest.telefone());
         adotante.setEmail(adotanteRequest.email());
         adotante.setDataNascimento(adotanteRequest.dataNascimento());
 
         adotante = adotanteRepository.save(adotante);
+        redisService.removeKey("ADOTANTE_" + adotanteId);
 
         return toResponse(adotante);
     }
@@ -85,6 +88,7 @@ public class AdotanteService implements IAdotanteService {
     public void deleteAdotante(UUID adotanteId) {
         Adotante adotante = findById(adotanteId);
         adotanteRepository.delete(adotante);
+        redisService.removeKey("ADOTANTE_" + adotanteId);
     }
 
     private Adotante findById(UUID adotanteId) {

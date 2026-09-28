@@ -20,7 +20,10 @@ public class AdotanteController implements IAdotanteController {
     private final IAdotanteService iAdotanteService;
 
     @GetMapping
-    public ResponseEntity<Page<AdotanteResponse>> getAdotantes(Integer page, Integer size) {
+    public ResponseEntity<Page<AdotanteResponse>> getAdotantes(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
         Page<AdotanteResponse> adotantes = iAdotanteService.getAdotantes(page, size);
         return ResponseEntity.ok(adotantes);
     }

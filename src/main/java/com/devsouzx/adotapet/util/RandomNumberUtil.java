@@ -2,13 +2,15 @@ package com.devsouzx.adotapet.util;
 
 import lombok.NoArgsConstructor;
 
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.Locale;
 
 @NoArgsConstructor
 public class RandomNumberUtil {
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     public static String generateRandomCode(){
-        Random rnd = new Random();
-        int randomNumber = rnd.nextInt(999999);
-        return String.format("%06d", randomNumber);
+        int randomNumber = RANDOM.nextInt(1_000_000);
+        return String.format(Locale.ROOT, "%06d", randomNumber);
     }
 }

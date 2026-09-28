@@ -5,6 +5,7 @@ import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import com.devsouzx.adotapet.dto.response.AbrigoInfoResponse;
 import com.devsouzx.adotapet.dto.request.AbrigoUpdateRequest;
 import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class AbrigoController implements IAbrigoController {
     }
 
     @PutMapping("/editar")
-    public ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(@AuthenticationPrincipal Abrigo abrigo, @RequestBody AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
+    public ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(@AuthenticationPrincipal Abrigo abrigo, @RequestBody @Valid AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
             return ResponseEntity.ok(iAbrigoService.updateAbrigo(abrigo.getId(), abrigoUpdateRequest));
     }
 

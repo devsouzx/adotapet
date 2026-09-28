@@ -45,8 +45,8 @@ public class AuthenticationController implements IAuthenticationController {
         return ResponseEntity.ok(new AuthenticationResponse(abrigo.getNome(), token));
     }
 
-    @GetMapping(value = "/request-password-reset/")
-    public ResponseEntity<Void> sendRequestPasswordResetEmail(@RequestBody UserRequestResetPasswordRequest request) throws Exception {
+    @PostMapping(value = "/request-password-reset")
+    public ResponseEntity<Void> sendRequestPasswordResetEmail(@RequestBody @Valid UserRequestResetPasswordRequest request) throws Exception {
         iAuthenticationService.sendPassswordResetEmail(request.email());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -54,7 +54,7 @@ public class AuthenticationController implements IAuthenticationController {
     @PostMapping(value = "/resetpassword/")
     public ResponseEntity<Void> resetPassword(@RequestParam("id") UUID id,
                                               @RequestParam("hash") String code,
-                                              @RequestBody UserResetPasswordRequest request) throws Exception {
+                                              @RequestBody @Valid UserResetPasswordRequest request) throws Exception {
         iAuthenticationService.resetPassword(request, id, code);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
