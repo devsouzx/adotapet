@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +53,7 @@ public class AdotanteService implements IAdotanteService {
 
         adotante = adotanteRepository.save(adotante);
         AdotanteResponse adotanteResponse = toResponse(adotante);
-        redisService.setValue("ADOTANTE_" + adotante.getId(), adotanteResponse, TimeUnit.MILLISECONDS, 600000L);
+        redisService.setValue("ADOTANTE_" + adotante.getId(), adotanteResponse, Duration.ofMinutes(10));
 
         return adotanteResponse;
     }
@@ -63,7 +64,7 @@ public class AdotanteService implements IAdotanteService {
         if (adotanteResponse == null) {
             Adotante adotante = findById(adotanteId);
             adotanteResponse = toResponse(adotante);
-            redisService.setValue("ADOTANTE_" + adotante.getId(), adotanteResponse, TimeUnit.MILLISECONDS, 600000L);
+            redisService.setValue("ADOTANTE_" + adotante.getId(), adotanteResponse, Duration.ofMinutes(10));
         }
 
         return adotanteResponse;

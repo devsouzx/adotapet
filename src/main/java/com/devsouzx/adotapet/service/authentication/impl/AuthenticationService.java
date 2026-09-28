@@ -18,8 +18,8 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -46,7 +46,11 @@ public class AuthenticationService implements IAuthenticationService {
                     .resetPasswordCode(RandomNumberUtil.generateRandomCode())
                     .build();
 
-            redisService.setValue("PASSWORDREQUEST_" + email, userResetPasswordResponse, TimeUnit.MILLISECONDS, 1800000L);
+            redisService.setValue(
+                    "PASSWORDREQUEST_" + email,
+                    userResetPasswordResponse,
+                    Duration.ofMinutes(30)
+            );
         }
 
         trySendKafkaMessage(objectMapper.writeValueAsString(userResetPasswordResponse), "abrigo-reset-password");
@@ -57,7 +61,16 @@ public class AuthenticationService implements IAuthenticationService {
         Abrigo abrigo = iAbrigoService.getAbrigoById(id);
 
         UserResetPasswordResponse userResetPasswordResponse = (UserResetPasswordResponse) redisService.getValue("PASSWORDREQUEST_" + abrigo.getEmail(), UserResetPasswordResponse.class);
-        if (userResetPasswordResponse == null) throw new Exception("UserResetPasswordResponse does not exists");
+        if (userResetPasswordResponse == null
+                || !id.equals(userResetPasswordResponse.abrigoId())
+                || !abrigo.getEmail().equals(userResetPasswordResponse.email())
+                || userResetPasswordResponse.resetPasswordCode() == null
+                || code == null
+                || !MessageDigest.isEqual(
+                        userResetPasswordResponse.resetPasswordCode().getBytes(StandardCharsets.UTF_8),
+                        code.getBytes(StandardCharsets.UTF_8))) {
+            throw new IllegalArgumentException("Código de redefinição inválido ou expirado");
+        }
 
         if (!request.newPassword().equals(request.confirmPassword())) throw new IllegalArgumentException("The passwords you entered were not identical. Please try again.");
 
@@ -65,8 +78,6 @@ public class AuthenticationService implements IAuthenticationService {
         abrigoRepository.save(abrigo);
 
         redisService.removeKey("PASSWORDREQUEST_" + userResetPasswordResponse.email());
-        redisService.removeKey("ABRIGO_" + abrigo.getId());
-        redisService.removeKey("ABRIGO_" + abrigo.getEmail());
     }
 
     private void trySendKafkaMessage(String message, String topic) throws Exception {

@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -63,8 +64,8 @@ public class AbrigoService implements IAbrigoService {
         abrigo.setEndereco(endereco);
 
         abrigo = abrigoRepository.save(abrigo);
-        redisService.setValue("ABRIGO_" + abrigo.getId(), abrigo, TimeUnit.MILLISECONDS, 600000L);
-        redisService.setValue("ABRIGO_" + abrigo.getEmail(), abrigo, TimeUnit.MILLISECONDS, 600000L);
+        redisService.setValue("ABRIGO_" + abrigo.getId(), abrigo, Duration.ofMinutes(10));
+        redisService.setValue("ABRIGO_" + abrigo.getEmail(), abrigo, Duration.ofMinutes(10));
         return abrigo;
     }
 
@@ -97,7 +98,7 @@ public class AbrigoService implements IAbrigoService {
         Abrigo abrigo = (Abrigo) redisService.getValue("ABRIGO_" + email, Abrigo.class);
         if (abrigo == null) {
             abrigo = abrigoRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
-            redisService.setValue("ABRIGO_" + email, abrigo, TimeUnit.MILLISECONDS, 600000L);
+            redisService.setValue("ABRIGO_" + email, abrigo, Duration.ofMinutes(10));
         }
         return abrigo;
     }
@@ -106,7 +107,7 @@ public class AbrigoService implements IAbrigoService {
         Abrigo abrigo = (Abrigo) redisService.getValue("ABRIGO_" + identifier, Abrigo.class);
         if (abrigo == null) {
             abrigo = abrigoRepository.findById(identifier).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
-            redisService.setValue("ABRIGO_" + identifier, abrigo, TimeUnit.MILLISECONDS, 600000L);
+            redisService.setValue("ABRIGO_" + identifier, abrigo, Duration.ofMinutes(10));
         }
         return abrigo;
     }
