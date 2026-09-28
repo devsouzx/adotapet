@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IAbrigoController {
-    ResponseEntity<AbrigoInfoResponse> getAbrigoLoggedInfo(Abrigo abrigo) throws Exception;
-    ResponseEntity<AbrigoInfoResponse> getAbrigoById(UUID abrigoIdentifier) throws Exception;
-    ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(Abrigo abrigo, AbrigoUpdateRequest abrigoUpdateRequest) throws Exception;
-    ResponseEntity<Page<AbrigoInfoResponse>> getAbrigosProximos(double latitude, double longitude, double raio, Integer page, Integer size) throws Exception;
+    ResponseEntity<AbrigoInfoResponse> getAbrigoLoggedInfo(Abrigo abrigo);
+    ResponseEntity<AbrigoInfoResponse> getAbrigoById(UUID abrigoIdentifier);
+    ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(Abrigo abrigo, AbrigoUpdateRequest abrigoUpdateRequest);
+    ResponseEntity<Page<AbrigoInfoResponse>> getAbrigosProximos(double latitude, double longitude, double raio, Integer page, Integer size);
 }

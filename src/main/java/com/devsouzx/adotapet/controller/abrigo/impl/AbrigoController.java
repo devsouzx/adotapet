@@ -21,17 +21,17 @@ public class AbrigoController implements IAbrigoController {
     private final IAbrigoService iAbrigoService;
 
     @GetMapping
-    public ResponseEntity<AbrigoInfoResponse> getAbrigoLoggedInfo(@AuthenticationPrincipal Abrigo abrigo) throws Exception {
+    public ResponseEntity<AbrigoInfoResponse> getAbrigoLoggedInfo(@AuthenticationPrincipal Abrigo abrigo) {
         return ResponseEntity.ok(iAbrigoService.getAbrigoInfoById(abrigo.getId()));
     }
 
     @GetMapping("/{identifier}")
-    public ResponseEntity<AbrigoInfoResponse> getAbrigoById(@PathVariable("identifier") UUID abrigoIdentifier) throws Exception {
+    public ResponseEntity<AbrigoInfoResponse> getAbrigoById(@PathVariable("identifier") UUID abrigoIdentifier) {
         return ResponseEntity.ok(iAbrigoService.getAbrigoInfoById(abrigoIdentifier));
     }
 
     @PutMapping("/editar")
-    public ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(@AuthenticationPrincipal Abrigo abrigo, @RequestBody @Valid AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
+    public ResponseEntity<AbrigoInfoResponse> updateAbrigoInfo(@AuthenticationPrincipal Abrigo abrigo, @RequestBody @Valid AbrigoUpdateRequest abrigoUpdateRequest) {
             return ResponseEntity.ok(iAbrigoService.updateAbrigo(abrigo.getId(), abrigoUpdateRequest));
     }
 

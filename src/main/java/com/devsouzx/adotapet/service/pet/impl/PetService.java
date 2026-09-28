@@ -9,6 +9,10 @@ import com.devsouzx.adotapet.dto.request.PetRequest;
 import com.devsouzx.adotapet.dto.response.AbrigoResumoResponse;
 import com.devsouzx.adotapet.dto.response.PetInfoResponse;
 import com.devsouzx.adotapet.dto.response.PetResponse;
+import com.devsouzx.adotapet.exception.InvalidPaginationException;
+import com.devsouzx.adotapet.exception.PetDeletionForbiddenException;
+import com.devsouzx.adotapet.exception.PetNotFoundException;
+import com.devsouzx.adotapet.exception.PetUpdateForbiddenException;
 import com.devsouzx.adotapet.repository.PetRepository;
 import com.devsouzx.adotapet.service.pet.IPetService;
 import lombok.RequiredArgsConstructor;
@@ -72,17 +76,17 @@ public class PetService implements IPetService {
 
     @Override
     public PetResponse getPetById(UUID identifier) {
-        Pet pet = petRepository.findById(identifier).orElseThrow(() -> new RuntimeException("Pet not found"));
+        Pet pet = petRepository.findById(identifier).orElseThrow(PetNotFoundException::new);
 
         return toPetResponse(pet);
     }
 
     @Override
     public PetResponse updatePet(UUID petId, PetRequest petRequest, Abrigo abrigo) {
-        Pet pet = petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+        Pet pet = petRepository.findById(petId).orElseThrow(PetNotFoundException::new);
 
         if (!pet.getAbrigo().getId().equals(abrigo.getId())) {
-            throw new RuntimeException("You do not have permission to update this pet");
+            throw new PetUpdateForbiddenException();
         }
 
         pet.setId(petId);
@@ -127,10 +131,10 @@ public class PetService implements IPetService {
 
     @Override
     public void removePet(UUID petId, Abrigo abrigo) {
-        Pet pet = petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+        Pet pet = petRepository.findById(petId).orElseThrow(PetNotFoundException::new);
 
         if (!pet.getAbrigo().getId().equals(abrigo.getId())) {
-            throw new RuntimeException("You do not have permission to remove this pet");
+            throw new PetDeletionForbiddenException();
         }
 
         petRepository.delete(pet);
@@ -138,8 +142,8 @@ public class PetService implements IPetService {
 
     @Override
     public Page<PetResponse> getPetByFiltros(String nome, String especie, String raca, Integer idadeEstimadaMeses, BigDecimal peso, String status, String sexo, String porte, Integer page, Integer size) {
-        if (page < 0 || size < 1 || size > 100) {
-            throw new IllegalArgumentException("page deve ser >= 0 e size deve estar entre 1 e 100");
+        if (page == null || page < 0 || size == null || size < 1 || size > 100) {
+            throw new InvalidPaginationException();
         }
 
         Page<Pet> pets = petRepository.findByFiltros(

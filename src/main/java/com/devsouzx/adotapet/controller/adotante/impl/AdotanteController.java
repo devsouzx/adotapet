@@ -5,6 +5,7 @@ import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import com.devsouzx.adotapet.dto.request.AdotanteRequest;
 import com.devsouzx.adotapet.dto.response.AdotanteResponse;
 import com.devsouzx.adotapet.service.adotante.IAdotanteService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class AdotanteController implements IAdotanteController {
     }
 
     @PostMapping("/novo")
-    public ResponseEntity<AdotanteResponse> createAdotante(@AuthenticationPrincipal Abrigo abrigo, @RequestBody AdotanteRequest adotanteRequest) {
+    public ResponseEntity<AdotanteResponse> createAdotante(@AuthenticationPrincipal Abrigo abrigo, @RequestBody @Valid AdotanteRequest adotanteRequest) {
         AdotanteResponse adotanteResponse = iAdotanteService.createAdotante(adotanteRequest);
         return ResponseEntity.ok(adotanteResponse);
     }
@@ -41,7 +42,7 @@ public class AdotanteController implements IAdotanteController {
     }
 
     @PutMapping("/{adotanteId}")
-    public ResponseEntity<AdotanteResponse> updateAdotante(@PathVariable UUID adotanteId, @RequestBody AdotanteRequest adotanteRequest) {
+    public ResponseEntity<AdotanteResponse> updateAdotante(@PathVariable UUID adotanteId, @RequestBody @Valid AdotanteRequest adotanteRequest) {
         AdotanteResponse adotanteResponse = iAdotanteService.updateAdotante(adotanteId, adotanteRequest);
         return ResponseEntity.ok(adotanteResponse);
     }

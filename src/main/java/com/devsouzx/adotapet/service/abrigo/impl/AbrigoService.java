@@ -6,6 +6,12 @@ import com.devsouzx.adotapet.dto.request.AbrigoUpdateRequest;
 import com.devsouzx.adotapet.dto.request.RegisterRequest;
 import com.devsouzx.adotapet.dto.response.AbrigoInfoResponse;
 import com.devsouzx.adotapet.dto.response.EnderecoResponse;
+import com.devsouzx.adotapet.exception.EmailAlreadyRegisteredException;
+import com.devsouzx.adotapet.exception.InvalidCoordinatesException;
+import com.devsouzx.adotapet.exception.InvalidPaginationException;
+import com.devsouzx.adotapet.exception.InvalidSearchRadiusException;
+import com.devsouzx.adotapet.exception.PasswordMismatchException;
+import com.devsouzx.adotapet.exception.ShelterNotFoundException;
 import com.devsouzx.adotapet.repository.AbrigoRepository;
 import com.devsouzx.adotapet.repository.EnderecoRepository;
 import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
@@ -20,8 +26,8 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +42,7 @@ public class AbrigoService implements IAbrigoService {
         abrigo.setNome(request.nome());
         abrigo.setEmail(request.email());
         if (!Objects.equals(request.senha(), request.repetirSenha())) {
-            throw new RuntimeException("Senhas não coincidem");
+            throw new PasswordMismatchException();
         }
         abrigo.setSenha(passwordEncoder.encode(request.senha()));
         abrigo.setTelefone(request.telefone());
@@ -94,31 +100,36 @@ public class AbrigoService implements IAbrigoService {
                 .build();
     }
 
-    public Abrigo getAbrigoByEmail(String email) throws Exception {
+    public Abrigo getAbrigoByEmail(String email) {
         Abrigo abrigo = (Abrigo) redisService.getValue("ABRIGO_" + email, Abrigo.class);
         if (abrigo == null) {
-            abrigo = abrigoRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
+            abrigo = abrigoRepository.findByEmail(email).orElseThrow(ShelterNotFoundException::new);
             redisService.setValue("ABRIGO_" + email, abrigo, Duration.ofMinutes(10));
         }
         return abrigo;
     }
 
-    public Abrigo getAbrigoById(UUID identifier) throws Exception {
+    @Override
+    public Optional<Abrigo> findAbrigoByEmail(String email) {
+        return abrigoRepository.findByEmail(email);
+    }
+
+    public Abrigo getAbrigoById(UUID identifier) {
         Abrigo abrigo = (Abrigo) redisService.getValue("ABRIGO_" + identifier, Abrigo.class);
         if (abrigo == null) {
-            abrigo = abrigoRepository.findById(identifier).orElseThrow(() -> new RuntimeException("Abrigo não encontrado"));
+            abrigo = abrigoRepository.findById(identifier).orElseThrow(ShelterNotFoundException::new);
             redisService.setValue("ABRIGO_" + identifier, abrigo, Duration.ofMinutes(10));
         }
         return abrigo;
     }
 
-    public AbrigoInfoResponse getAbrigoInfoById(UUID id) throws Exception {
+    public AbrigoInfoResponse getAbrigoInfoById(UUID id) {
         Abrigo abrigo = getAbrigoById(id);
 
         return toResponse(abrigo);
     }
 
-    public AbrigoInfoResponse updateAbrigo(UUID id, AbrigoUpdateRequest abrigoUpdateRequest) throws Exception {
+    public AbrigoInfoResponse updateAbrigo(UUID id, AbrigoUpdateRequest abrigoUpdateRequest) {
         Abrigo abrigo =  getAbrigoById(id);
 
         abrigo.setNome(abrigoUpdateRequest.nome());
@@ -127,7 +138,7 @@ public class AbrigoService implements IAbrigoService {
             abrigoRepository.findByEmail(abrigoUpdateRequest.email())
                     .filter(outroAbrigo -> !outroAbrigo.getId().equals(id))
                     .ifPresent(outroAbrigo -> {
-                        throw new IllegalArgumentException("Esse e-mail já está cadastrado");
+                        throw new EmailAlreadyRegisteredException();
                     });
             abrigo.setEmail(abrigoUpdateRequest.email());
         }
@@ -147,10 +158,13 @@ public class AbrigoService implements IAbrigoService {
     public Page<AbrigoInfoResponse> getAbrigosProximos(double latitude, double longitude, double raio, Integer page, Integer size) {
         if (!Double.isFinite(latitude) || !Double.isFinite(longitude)
                 || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-            throw new IllegalArgumentException("Latitude ou longitude fora do intervalo permitido");
+            throw new InvalidCoordinatesException();
         }
-        if (!Double.isFinite(raio) || raio <= 0 || page == null || page < 0 || size == null || size < 1 || size > 100) {
-            throw new IllegalArgumentException("Raio deve ser positivo, page >= 0 e size deve estar entre 1 e 100");
+        if (!Double.isFinite(raio) || raio <= 0) {
+            throw new InvalidSearchRadiusException();
+        }
+        if (page == null || page < 0 || size == null || size < 1 || size > 100) {
+            throw new InvalidPaginationException();
         }
         raio *= 1000;
         Page<Abrigo> abrigos = abrigoRepository.findAbrigosProximos(latitude, longitude, raio, PageRequest.of(page, size));

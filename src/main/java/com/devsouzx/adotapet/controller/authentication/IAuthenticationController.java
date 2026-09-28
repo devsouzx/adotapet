@@ -6,6 +6,6 @@ import com.devsouzx.adotapet.dto.response.AuthenticationResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface IAuthenticationController {
-    ResponseEntity<AuthenticationResponse> login(LoginRequest request) throws Exception;
+    ResponseEntity<AuthenticationResponse> login(LoginRequest request);
     ResponseEntity<AuthenticationResponse> register(RegisterRequest request);
 }

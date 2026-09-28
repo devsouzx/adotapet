@@ -6,6 +6,6 @@ import java.util.UUID;
 
 public interface IAuthenticationService {
 
-    void sendPassswordResetEmail(String email) throws Exception;
-    void resetPassword(UserResetPasswordRequest request, UUID id, String code) throws Exception;
+    void sendPassswordResetEmail(String email);
+    void resetPassword(UserResetPasswordRequest request, UUID id, String code);
 }

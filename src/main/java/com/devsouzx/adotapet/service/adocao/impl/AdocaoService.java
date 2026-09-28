@@ -12,6 +12,14 @@ import com.devsouzx.adotapet.dto.request.EncerramentoAdocaoRequest;
 import com.devsouzx.adotapet.dto.response.AdocaoResponse;
 import com.devsouzx.adotapet.dto.response.AdotanteResponse;
 import com.devsouzx.adotapet.dto.response.PetAdocaoResponse;
+import com.devsouzx.adotapet.exception.AdopterNotFoundException;
+import com.devsouzx.adotapet.exception.AdoptionAlreadyClosedException;
+import com.devsouzx.adotapet.exception.AdoptionNotFoundException;
+import com.devsouzx.adotapet.exception.InvalidAdoptionDateException;
+import com.devsouzx.adotapet.exception.InvalidClosureDateException;
+import com.devsouzx.adotapet.exception.InvalidPaginationException;
+import com.devsouzx.adotapet.exception.PetNotAvailableException;
+import com.devsouzx.adotapet.exception.PetNotFoundException;
 import com.devsouzx.adotapet.repository.AdocaoRepository;
 import com.devsouzx.adotapet.repository.AdotanteRepository;
 import com.devsouzx.adotapet.repository.PetRepository;
@@ -20,9 +28,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -54,13 +60,13 @@ public class AdocaoService implements IAdocaoService {
     @Transactional
     public AdocaoResponse registrar(Abrigo abrigo, AdocaoRequest request) {
         Pet pet = petRepository.findById(request.petId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pet não encontrado"));
+                .orElseThrow(PetNotFoundException::new);
         if (!pet.getAbrigo().getId().equals(abrigo.getId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pet não encontrado");
+            throw new PetNotFoundException();
         }
         if (pet.getStatus() != StatusPet.DISPONIVEL
                 || adocaoRepository.existsByPetIdAndStatus(request.petId(), StatusAdocao.ATIVA)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "O pet não está disponível para adoção");
+            throw new PetNotAvailableException();
         }
 
         Adotante adotante = buscarAdotante(request.adotanteId());
@@ -86,7 +92,7 @@ public class AdocaoService implements IAdocaoService {
         Adocao adocao = buscarDoAbrigo(abrigo, id);
         validarDataAdocao(request.dataAdocao());
         if (adocao.getDataEncerramento() != null && request.dataAdocao().isAfter(adocao.getDataEncerramento())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data da adoção não pode ser posterior ao encerramento");
+            throw new InvalidAdoptionDateException("A data da adoção não pode ser posterior ao encerramento");
         }
 
         adocao.setAdotante(buscarAdotante(request.adotanteId()));
@@ -100,14 +106,14 @@ public class AdocaoService implements IAdocaoService {
     public AdocaoResponse encerrar(Abrigo abrigo, UUID id, EncerramentoAdocaoRequest request) {
         Adocao adocao = buscarDoAbrigo(abrigo, id);
         if (adocao.getStatus() == StatusAdocao.ENCERRADA) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "A adoção já está encerrada");
+            throw new AdoptionAlreadyClosedException();
         }
 
         LocalDate dataEncerramento = request == null || request.dataEncerramento() == null
                 ? LocalDate.now()
                 : request.dataEncerramento();
         if (dataEncerramento.isBefore(adocao.getDataAdocao()) || dataEncerramento.isAfter(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Data de encerramento inválida");
+            throw new InvalidClosureDateException();
         }
 
         adocao.setStatus(StatusAdocao.ENCERRADA);
@@ -135,23 +141,23 @@ public class AdocaoService implements IAdocaoService {
 
     private Adocao buscarDoAbrigo(Abrigo abrigo, UUID id) {
         return adocaoRepository.findByIdAndAbrigoId(id, abrigo.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adoção não encontrada"));
+                .orElseThrow(AdoptionNotFoundException::new);
     }
 
     private Adotante buscarAdotante(UUID id) {
         return adotanteRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Adotante não encontrado"));
+                .orElseThrow(AdopterNotFoundException::new);
     }
 
     private void validarPaginacao(Integer page, Integer size) {
         if (page == null || page < 0 || size == null || size < 1 || size > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page deve ser >= 0 e size deve estar entre 1 e 100");
+            throw new InvalidPaginationException();
         }
     }
 
     private void validarDataAdocao(LocalDate data) {
         if (data == null || data.isAfter(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data da adoção deve ser hoje ou anterior");
+            throw new InvalidAdoptionDateException();
         }
     }
 

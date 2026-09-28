@@ -3,6 +3,8 @@ package com.devsouzx.adotapet.service.adotante.impl;
 import com.devsouzx.adotapet.domain.adotante.Adotante;
 import com.devsouzx.adotapet.dto.request.AdotanteRequest;
 import com.devsouzx.adotapet.dto.response.AdotanteResponse;
+import com.devsouzx.adotapet.exception.AdopterNotFoundException;
+import com.devsouzx.adotapet.exception.InvalidPaginationException;
 import com.devsouzx.adotapet.repository.AdotanteRepository;
 import com.devsouzx.adotapet.service.adotante.IAdotanteService;
 import com.devsouzx.adotapet.service.redis.RedisService;
@@ -24,7 +26,7 @@ public class AdotanteService implements IAdotanteService {
     @Override
     public Page<AdotanteResponse> getAdotantes(Integer page, Integer size) {
         if (page == null || page < 0 || size == null || size < 1 || size > 100) {
-            throw new IllegalArgumentException("page deve ser >= 0 e size deve estar entre 1 e 100");
+            throw new InvalidPaginationException();
         }
         Page<Adotante> adotantes = adotanteRepository.findAll(PageRequest.of(page, size));
 
@@ -93,6 +95,6 @@ public class AdotanteService implements IAdotanteService {
     }
 
     private Adotante findById(UUID adotanteId) {
-        return adotanteRepository.findById(adotanteId).orElseThrow(() -> new RuntimeException("Adotante não encontrado"));
+        return adotanteRepository.findById(adotanteId).orElseThrow(AdopterNotFoundException::new);
     }
 }

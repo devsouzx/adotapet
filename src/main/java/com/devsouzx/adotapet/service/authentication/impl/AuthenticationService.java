@@ -3,6 +3,10 @@ package com.devsouzx.adotapet.service.authentication.impl;
 import com.devsouzx.adotapet.domain.abrigo.Abrigo;
 import com.devsouzx.adotapet.dto.request.UserResetPasswordRequest;
 import com.devsouzx.adotapet.dto.response.UserResetPasswordResponse;
+import com.devsouzx.adotapet.exception.InvalidResetCodeException;
+import com.devsouzx.adotapet.exception.PasswordMismatchException;
+import com.devsouzx.adotapet.exception.ResetEmailPreparationException;
+import com.devsouzx.adotapet.exception.ResetEmailUnavailableException;
 import com.devsouzx.adotapet.repository.AbrigoRepository;
 import com.devsouzx.adotapet.service.abrigo.IAbrigoService;
 import com.devsouzx.adotapet.service.authentication.IAuthenticationService;
@@ -14,12 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
@@ -33,8 +40,12 @@ public class AuthenticationService implements IAuthenticationService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public void sendPassswordResetEmail(String email) throws Exception {
-        Abrigo abrigo = iAbrigoService.getAbrigoByEmail(email);
+    public void sendPassswordResetEmail(String email) {
+        Optional<Abrigo> optionalAbrigo = iAbrigoService.findAbrigoByEmail(email);
+        if (optionalAbrigo.isEmpty()) {
+            return;
+        }
+        Abrigo abrigo = optionalAbrigo.get();
         UserResetPasswordResponse userResetPasswordResponse =
                 (UserResetPasswordResponse) redisService.getValue("PASSWORDREQUEST_" + email, UserResetPasswordResponse.class);
         if (userResetPasswordResponse == null
@@ -53,11 +64,11 @@ public class AuthenticationService implements IAuthenticationService {
             );
         }
 
-        trySendKafkaMessage(objectMapper.writeValueAsString(userResetPasswordResponse), "abrigo-reset-password");
+        trySendKafkaMessage(serializeResetRequest(userResetPasswordResponse), "abrigo-reset-password");
     }
 
     @Transactional
-    public void resetPassword(UserResetPasswordRequest request, UUID id, String code) throws Exception {
+    public void resetPassword(UserResetPasswordRequest request, UUID id, String code) {
         Abrigo abrigo = iAbrigoService.getAbrigoById(id);
 
         UserResetPasswordResponse userResetPasswordResponse = (UserResetPasswordResponse) redisService.getValue("PASSWORDREQUEST_" + abrigo.getEmail(), UserResetPasswordResponse.class);
@@ -69,10 +80,12 @@ public class AuthenticationService implements IAuthenticationService {
                 || !MessageDigest.isEqual(
                         userResetPasswordResponse.resetPasswordCode().getBytes(StandardCharsets.UTF_8),
                         code.getBytes(StandardCharsets.UTF_8))) {
-            throw new IllegalArgumentException("Código de redefinição inválido ou expirado");
+            throw new InvalidResetCodeException();
         }
 
-        if (!request.newPassword().equals(request.confirmPassword())) throw new IllegalArgumentException("The passwords you entered were not identical. Please try again.");
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new PasswordMismatchException();
+        }
 
         abrigo.setSenha(passwordEncoder.encode(request.confirmPassword()));
         abrigoRepository.save(abrigo);
@@ -80,13 +93,25 @@ public class AuthenticationService implements IAuthenticationService {
         redisService.removeKey("PASSWORDREQUEST_" + userResetPasswordResponse.email());
     }
 
-    private void trySendKafkaMessage(String message, String topic) throws Exception {
+    private void trySendKafkaMessage(String message, String topic) {
         try {
             kafkaTemplate.send(topic, message).get();
             log.info("Mensagem enviada com sucesso para o tópico: {}", topic);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             log.error("Erro ao enviar mensagem para o tópico {}", topic, e);
-            throw e;
+            throw new ResetEmailUnavailableException(e);
+        } catch (ExecutionException e) {
+            log.error("Erro ao enviar mensagem para o tópico {}", topic, e);
+            throw new ResetEmailUnavailableException(e);
+        }
+    }
+
+    private String serializeResetRequest(UserResetPasswordResponse response) {
+        try {
+            return objectMapper.writeValueAsString(response);
+        } catch (JacksonException e) {
+            throw new ResetEmailPreparationException(e);
         }
     }
 }

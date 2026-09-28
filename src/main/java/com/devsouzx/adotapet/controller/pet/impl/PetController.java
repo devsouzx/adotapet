@@ -6,6 +6,7 @@ import com.devsouzx.adotapet.dto.request.PetRequest;
 import com.devsouzx.adotapet.dto.response.PetInfoResponse;
 import com.devsouzx.adotapet.dto.response.PetResponse;
 import com.devsouzx.adotapet.service.pet.IPetService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class PetController implements IPetController {
     }
 
     @PostMapping("/novo")
-    public ResponseEntity<PetResponse> createPet(@AuthenticationPrincipal Abrigo abrigo, @RequestBody PetRequest petRequest) {
+    public ResponseEntity<PetResponse> createPet(@AuthenticationPrincipal Abrigo abrigo, @RequestBody @Valid PetRequest petRequest) {
         PetResponse pet = iPetService.createPet(petRequest, abrigo);
         return ResponseEntity.ok(pet);
     }
@@ -41,7 +42,7 @@ public class PetController implements IPetController {
     }
 
     @PutMapping("/{identifier}/editar")
-    public ResponseEntity<PetResponse> updatePet(@AuthenticationPrincipal Abrigo abrigo, @PathVariable("identifier") UUID petId, @RequestBody PetRequest petRequest) {
+    public ResponseEntity<PetResponse> updatePet(@AuthenticationPrincipal Abrigo abrigo, @PathVariable("identifier") UUID petId, @RequestBody @Valid PetRequest petRequest) {
         PetResponse pet = iPetService.updatePet(petId, petRequest, abrigo);
         return ResponseEntity.ok(pet);
     }
