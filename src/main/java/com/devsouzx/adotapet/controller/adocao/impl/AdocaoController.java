@@ -8,6 +8,9 @@ import com.devsouzx.adotapet.dto.request.EncerramentoAdocaoRequest;
 import com.devsouzx.adotapet.dto.response.AdocaoResponse;
 import com.devsouzx.adotapet.service.adocao.IAdocaoService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -20,11 +23,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/adocao")
 @RequiredArgsConstructor
+@Tag(name = "Adoções", description = "Registro, consulta e gerenciamento de adoções.")
+@SecurityRequirement(name = "bearerAuth")
 public class AdocaoController implements IAdocaoController {
     private final IAdocaoService adocaoService;
 
     @Override
     @GetMapping
+    @Operation(summary = "Listar adoções do abrigo autenticado")
     public ResponseEntity<Page<AdocaoResponse>> listar(
             @AuthenticationPrincipal Abrigo abrigo,
             @RequestParam(defaultValue = "0") Integer page,
@@ -36,6 +42,7 @@ public class AdocaoController implements IAdocaoController {
 
     @Override
     @GetMapping("/{id}")
+    @Operation(summary = "Consultar adoção por identificador")
     public ResponseEntity<AdocaoResponse> buscarPorId(
             @AuthenticationPrincipal Abrigo abrigo,
             @PathVariable UUID id
@@ -46,6 +53,7 @@ public class AdocaoController implements IAdocaoController {
 
     @Override
     @PostMapping
+    @Operation(summary = "Registrar adoção")
     public ResponseEntity<AdocaoResponse> registrar(
             @AuthenticationPrincipal Abrigo abrigo,
             @RequestBody @Valid AdocaoRequest request
@@ -55,6 +63,7 @@ public class AdocaoController implements IAdocaoController {
 
     @Override
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar adoção")
     public ResponseEntity<AdocaoResponse> atualizar(
             @AuthenticationPrincipal Abrigo abrigo,
             @PathVariable UUID id,
@@ -65,6 +74,7 @@ public class AdocaoController implements IAdocaoController {
 
     @Override
     @PatchMapping("/{id}/encerrar")
+    @Operation(summary = "Encerrar adoção")
     public ResponseEntity<AdocaoResponse> encerrar(
             @AuthenticationPrincipal Abrigo abrigo,
             @PathVariable UUID id,
@@ -75,6 +85,7 @@ public class AdocaoController implements IAdocaoController {
 
     @Override
     @DeleteMapping("/{id}")
+    @Operation(summary = "Excluir adoção")
     public ResponseEntity<Void> excluir(
             @AuthenticationPrincipal Abrigo abrigo,
             @PathVariable UUID id

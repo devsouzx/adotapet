@@ -32,6 +32,7 @@ public class SecurityConfig {
                         AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/pet", "/pet/filtros", "/pet/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/abrigo/*", "/abrigo/proximos").permitAll()
