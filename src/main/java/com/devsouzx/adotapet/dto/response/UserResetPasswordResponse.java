@@ -1,21 +1,12 @@
 package com.devsouzx.adotapet.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
+import java.util.UUID;
 
-@AllArgsConstructor
 @Builder
-public class UserResetPasswordResponse {
-    String email;
-    String resetPasswordCode;
-
-    @Override
-    public String toString() {
-        return "{\"email\": \"" + email + "\", \"resetPasswordCode\": \"" + resetPasswordCode + "\"}";
-    }
-}
+public record UserResetPasswordResponse(
+    UUID abrigoId,
+    String email,
+    String resetPasswordCode
+) {}

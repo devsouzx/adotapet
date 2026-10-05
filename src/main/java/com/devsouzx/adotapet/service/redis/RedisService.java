@@ -4,7 +4,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 @Service
 public class RedisService {
@@ -41,14 +41,12 @@ public class RedisService {
 
     public void setValue(String key,
                          Object value,
-                         TimeUnit unit,
-                         long timeout) {
-
+                         Duration timeout) {
         try {
             String json = objectMapper.writeValueAsString(value);
 
             redisTemplate.opsForValue()
-                    .set(key, json, timeout, unit);
+                    .set(key, json, timeout);
 
         } catch (Exception e) {
             throw new IllegalStateException(
@@ -56,9 +54,5 @@ public class RedisService {
                     e
             );
         }
-    }
-
-    public boolean hasKey(String key) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 }

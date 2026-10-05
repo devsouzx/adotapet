@@ -2,20 +2,15 @@ package com.devsouzx.adotapet.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class UserResetPasswordRequest {
+public record UserResetPasswordRequest(
     @NotBlank
     @NotNull
-    private String newPassword;
+    String newPassword,
     @NotBlank
     @NotNull
-    private String confirmPassword;
+    String confirmPassword
+) {
 }

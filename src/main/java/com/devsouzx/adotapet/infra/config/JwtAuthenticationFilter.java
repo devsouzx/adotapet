@@ -30,10 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         var login = tokenService.validateToken(token);
 
         if (login != null) {
-            Abrigo user = abrigoRepository.findByEmail(login).orElseThrow(() -> new RuntimeException("Abrigo não encontrado!"));
-            var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, authorities);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            abrigoRepository.findByEmail(login).ifPresent(user -> {
+                var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            });
         }
 
         filterChain.doFilter(request, response);
@@ -41,7 +42,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public String recoverToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        if(authHeader == null) return null;
-        return authHeader.replace("Bearer ", "");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        return authHeader.substring(7).trim();
     }
 }
