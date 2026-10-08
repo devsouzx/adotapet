@@ -36,7 +36,6 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/pet", "/pet/filtros", "/pet/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/abrigo/*", "/abrigo/proximos").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/adotante", "/adotante/*").permitAll()
                         .requestMatchers("/adocao", "/adocao/**").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors

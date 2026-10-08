@@ -119,7 +119,7 @@ public class PetServiceTest {
         assertEquals(1, service.getPetByFiltros(null, null, null, null, null,
                 " DISPONIVEL ", " FEMEA ", " PEQUENO ", 2, 5).getTotalElements());
         verify(petRepository).findByFiltros(isNull(), isNull(), isNull(), isNull(), isNull(),
-                eq("DISPONIVEL"), eq("FEMEA"), eq("PEQUENO"), eq(PageRequest.of(2, 5)));
+                eq(StatusPet.DISPONIVEL), eq(SexoPet.FEMEA), eq(PortePet.PEQUENO), eq(PageRequest.of(2, 5)));
     }
 
     @Test

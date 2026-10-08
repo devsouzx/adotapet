@@ -32,9 +32,9 @@ public interface PetRepository extends JpaRepository<Pet, UUID> {
             @Param("raca") String raca,
             @Param("idadeEstimadaMeses") Integer idadeEstimadaMeses,
             @Param("peso") BigDecimal peso,
-            @Param("status") String status,
-            @Param("sexo") String sexo,
-            @Param("porte") String porte,
+            @Param("status") StatusPet status,
+            @Param("sexo") SexoPet sexo,
+            @Param("porte") PortePet porte,
             Pageable pageable
     );
 }

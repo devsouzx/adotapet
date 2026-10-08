@@ -122,6 +122,19 @@ A aplicação normalmente sobe em:
 http://localhost:8080
 ```
 
+### Frontend
+
+O frontend React está em `frontend/`, separado do código Java. Com o backend em execução:
+
+```powershell
+cd frontend
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
+
+O Vite usa um proxy local para o backend em `http://localhost:8080`. Consulte [frontend/README.md](frontend/README.md) para o mapeamento dos endpoints, contratos, regras e limitações identificados.
+
 ## Documentação da API
 
 A API possui documentação automatizada via Swagger/OpenAPI.

@@ -152,9 +152,9 @@ public class PetService implements IPetService {
                 raca,
                 idadeEstimadaMeses,
                 peso,
-                status == null || status.isBlank() ? null : status.trim(),
-                sexo == null || sexo.isBlank() ? null : sexo.trim(),
-                porte == null || porte.isBlank() ? null : porte.trim(),
+                status == null || status.isBlank() ? null : StatusPet.fromString(status.trim()),
+                sexo == null || sexo.isBlank() ? null : SexoPet.fromString(sexo.trim()),
+                porte == null || porte.isBlank() ? null : PortePet.fromString(porte.trim()),
                 PageRequest.of(page, size)
         );
 
