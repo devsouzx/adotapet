@@ -41,5 +41,8 @@ build/
 !/frontend/.env.example
 /frontend/tsconfig.tsbuildinfo
 
+### Local environment variables ###
+/.env
+
 ### Mac OS ###
 .DS_Store
